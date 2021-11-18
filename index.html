@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<!--    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Bootstrap CSS -->
+    &lt;!&ndash; Bootstrap CSS &ndash;&gt;
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">-->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <script src="js/myfuncs.js"></script>
+
+<!--    <script type='text/javascript' src='http://code.jquery.com/jquery-1.8.3.min.js'></script>
+    <script type='text/javascript' src='http://www.google.com/jsapi'></script>
+    <script type='text/javascript'></script>-->
 
     <title>Exercise 3 - API</title>
 </head>
@@ -29,76 +39,88 @@
     <div class="row">
         <div class="col-lg-6 ">
 
-            <div class="p-1 mb-2 " style="background-color: lightskyblue">
-                <h3 style="-webkit-text-fill-color: royalblue " >Search for Images:</h3>
+            <div class="p-1 mb-2 " style="background-color: #80DEEA">
+                <h3 class="text-info " >Search for Images:</h3>
             </div>
-
+            <!--border border-5 rounded-3 card-->
+<!--style="background-color: lightskyblue"-->
 
             <div id="mainDiv">
 
-                <form class="mb-3" id="form" method="post" autocomplete="on">
+                <form class="mb-3" id="myForm" method="post" autocomplete="on">
                     <div class="form-group mb-2">
-                        <label for="ID" class="form-label">Date (YYYY-MM-DD) or Sol</label>
-                        <input type="text" class="form-control" id="ID" placeholder="type your to-do here"
+                        <label for="date" class="form-label">Date (YYYY-MM-DD) or Sol</label>
+                        <input type="text" class="form-control" id="date" placeholder="enter a date"
                                autocomplete="on" required>
                     </div>
+                    <div id="incorrectDateInp"></div>
 
                     <div class="mb-2">
-                        <label for="floatingSelect">Select Mission</label>
-                        <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
+                        <label for="mission">Select Mission</label>
+                        <select class="form-select" id="mission" aria-label="Floating label select example">
                             <option selected>Choose a mission</option>
-                            <option value="1">Curiosity</option>
-                            <option value="2">Opportunity</option>
-                            <option value="3">Spirit</option>
+                            <option value="Curiosity">Curiosity</option>
+                            <option value="Opportunity">Opportunity</option>
+                            <option value="Spirit">Spirit</option>
                         </select>
                     </div>
 
                     <div class="mb-3">
-                        <label for="floatingSelect2">Select Camera</label>
-                        <select class="form-select" id="floatingSelect2" aria-label="Floating label select example">
+                        <label for="camera">Select Camera</label>
+                        <select class="form-select" id="camera" aria-label="Floating label select example">
                             <option selected>Choose a camera</option>
-                            <option value="1">FHAZ</option>
-                            <option value="2">RHAZ</option>
-                            <option value="3">MAST</option>
-                            <option value="4">CHEMCAM</option>
-                            <option value="5">MAHLI</option>
-                            <option value="6">MARDI</option>
-                            <option value="7">NAVCAM</option>
-                            <option value="8">PANCAM</option>
-                            <option value="8">MINITES</option>
+                            <option value="FHAZ">FHAZ</option>
+                            <option value="RHAZ">RHAZ</option>
+                            <option value="MAST">MAST</option>
+                            <option value="CHEMCAM">CHEMCAM</option>
+                            <option value="MAHLI">MAHLI</option>
+                            <option value="MARDI">MARDI</option>
+                            <option value="NAVCAM">NAVCAM</option>
+                            <option value="PANCAM">PANCAM</option>
+                            <option value="MINITES">MINITES</option>
                         </select>
                     </div>
-
                 </form>
+                <button class="btn btn-outline-info mb-3" id="searchBtn">Search</button>
+                <button type="reset" class="btn btn-outline-info mb-3" id="clearBtn" >Clear</button>
 
-                <button class="btn btn-outline-primary mb-3" id="get">Search</button>
-                <button class="btn btn-outline-primary mb-3" id="ge">Clear</button>
-                <div id="data"></div>
+           <!--     <div id="data"></div>-->
             </div>
 
         </div>
 
         <div class="col-lg-6 ">
-            <div class="p-1 mb-2 text-white" style="background-color: cornflowerblue">
-                <h3>Saved Images</h3>
+            <div class="p-1 mb-2 " style="background-color: #9ec9f3" >
+                <h3 class="text-primary">Saved Images</h3>
             </div>
+            <!--#90CAF9"-->
 <!--            <div class="p-1 mb-2 text-white" style="background-color: skyblue">
                 <h3 style="-webkit-text-fill-color: darkcyan">Saved Images</h3>
             </div>-->
 
             <div>
-                <button class="btn btn-outline-primary mb-2" id="getdat">Start Slide Show</button>
-                <button class="btn btn-outline-primary mb-2" id="getda">Stop Slide Show</button>
-                <div id="dat"></div>
+                <button class="btn btn-outline-primary mb-2" >Start Slide Show</button>
+                <button class="btn btn-outline-primary mb-2" >Stop Slide Show</button>
+
+                <div id="infos"></div>
             </div>
         </div>
     </div>
 
     <div class="row">
         <div class="col">
-            <div class="p-1 mb-2 " style="background-color: lightskyblue">
-                <h3 style="-webkit-text-fill-color: royalblue">Search for Images:</h3>
+            <div class="p-1 mb-2 " style="background-color: #80DEEA">
+                <h3 class="text-info" >Search result:</h3>
             </div>
+
+           <ol id="imagesOutput">
+
+
+            </ol>
+            <img src="" id="image" alt="Mars Photo" width="300px" height=auto style="display: none">
+
+          <!--  <div id="imagesOutput">
+            </div>-->
 
             <p><br><br></p>
         </div>
@@ -129,12 +151,24 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
 </body>
 </html>
 
 
+<!--
+<div>
+    <input id="date" type="date">
+    <button id="button" href="">Submit</button>
+</div>
 
+curiosity first start:
+datePicker.min = "2012-08-06"
+
+spirit:
+June 10, 2003
+
+opp:
+July 8, 2003
+-->
