@@ -60,8 +60,8 @@ class Image {
         let mis = createNode('p');
         appendNode(cardBody, mis, 'card-text', this.mission);
 
-        let btnDelete = createNode('button');
-        appendNode(cardBody, btnDelete, 'btn btn-info ml-2 mr-2', 'Save');
+        let btnSave = createNode('button');
+        appendNode(cardBody, btnSave, 'btn btn-info ml-2 mr-2', 'Save');
 
         let a = createNode('a');
         a.setAttribute('href', this.image);
@@ -69,8 +69,8 @@ class Image {
         // setAttr('a', 'href', this.image)
         appendNode(cardBody, a, '', '');
 
-        let btnDelete2 = createNode('button');
-        appendNode(a, btnDelete2, 'btn btn-primary ml-2 mr-2', "Full size");
+        let btnFullSize = createNode('button');
+        appendNode(a, btnFullSize, 'btn btn-primary ml-2 mr-2', "Full size");
 
         return myDiv;
     }
@@ -306,6 +306,14 @@ const createImageCarousel = function (img_src, cameraName, dateMission, index) {
     let date = createNode('p');
     date.innerHTML = dateMission;
     divCap.appendChild(date);
+
+    let a = createNode('a');
+    a.setAttribute('href', img_src);
+    a.setAttribute('target', "_blank")
+    appendNode(divCap, a, '', '');
+
+    let btn = createNode('button');
+    appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
 
     return div;
 }
