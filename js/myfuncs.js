@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
         setAttr('#date', 'class', 'form-control');
         setAttr('#incorrectDateInp', "class", "d-none");
     });
+    querySelect('#slideShow').addEventListener('click', slideShow);
+    querySelect('#stopSlideShow').addEventListener('click', function (){
+        querySelect('#innerCarousel').innerHTML = '';
+    });
 
 }, false);
 
@@ -25,7 +29,7 @@ class Image {
         this.image = image;
         this.date = date;
         this.id = id;
-        this.mission = mission; // when pressed Enter key will insert new line to the string of the description text
+        this.mission = mission;
         this.camera = camera;
     }
 
@@ -56,10 +60,16 @@ class Image {
         appendNode(cardBody, mis, 'card-text', this.mission);
 
         let btnDelete = createNode('button');
-        appendNode(cardBody, btnDelete, 'btn btn-info ml-2 mr-2', "Save");
+        appendNode(cardBody, btnDelete, 'btn btn-info ml-2 mr-2', 'Save');
+
+        let a = createNode('a');
+        a.setAttribute('href', this.image);
+        a.setAttribute('target',"_blank" )
+       // setAttr('a', 'href', this.image)
+        appendNode(cardBody, a, '', '');
 
         let btnDelete2 = createNode('button');
-        appendNode(cardBody, btnDelete2, 'btn btn-primary ml-2 mr-2', "Full size");
+        appendNode(a, btnDelete2, 'btn btn-primary ml-2 mr-2', "Full size");
 
         return myDiv;
     }
@@ -79,7 +89,6 @@ const appendNode = function (parent, child, nameClass, inner) { // generic func
 //------------------------------------------
 async function getData() {
     clearForm();
-
     let dateInp = getById("date").value.trim();
     let mission = getById('mission').value;
     let cam = getById('camera').value;
@@ -87,7 +96,7 @@ async function getData() {
     if (!correctInput(dateInp, mission, cam))
         return;
 
-    querySelect("#imagesOutput").innerHTML = "<img src=https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif width=\"60\" height=\"60\" alt='...' >";
+    querySelect("#imagesOutput1").innerHTML = "<img src=https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif width=\"60\" height=\"60\" alt='...' >";
     setAttr('#date', 'class', 'form-control');
     setAttr('#mission', 'class', 'form-select');
     setAttr('#camera', 'class', 'form-select');
@@ -105,10 +114,11 @@ async function getData() {
                 imgList.push(new Image(p.img_src, dateInp, p.id, mission, cam));
             });
             displayList();
+            buttonsSaveHandle(res); // buttons handle
         })
         .catch(function (err) {
             console.log("catch: " + err);
-            querySelect("#imagesOutput").innerHTML = "Sorry, no photos at this date...";
+            querySelect("#imagesOutput1").innerHTML = "Sorry, no photos at this date...";
         });
 
     setAttr('#incorrectDateInp', "class", "d-none");
@@ -131,9 +141,16 @@ const setAttr = function (container, qualName, val) {// generic func
 }
 //--------------------------------------
 const displayList = function () { // display list of tasks to the DOM
-    querySelect("#imagesOutput").innerHTML = '';// clear div
+    querySelect("#imagesOutput1").innerHTML = '';// clear div
+    querySelect("#imagesOutput2").innerHTML = '';// clear div
+    querySelect("#imagesOutput3").innerHTML = '';// clear div
     imgList.forEach(img => {
-        querySelect("#imagesOutput").appendChild(img.createDiv()); // inset tasks to div dom
+        if (imgList.indexOf(img) % 3 === 0)
+            querySelect("#imagesOutput1").appendChild(img.createDiv()); // inset tasks to div dom
+        else if (imgList.indexOf(img) % 3 === 1)
+            querySelect("#imagesOutput2").appendChild(img.createDiv()); // inset tasks to div dom
+        else if (imgList.indexOf(img) % 3 === 2)
+            querySelect("#imagesOutput3").appendChild(img.createDiv()); // inset tasks to div dom
     });
 }
 //------------------------------------------------
@@ -178,7 +195,7 @@ const correctInput = function (date, mission, cam) {
 }
 //---------------------------------
 const validDate = function (date) {
-    return date.match(/^\d{4}-\d{1,2}-\d{1,2}$/)  || date.match(/^\d{1,4}$/);
+    return date.match(/^\d{4}-\d{1,2}-\d{1,2}$/) || date.match(/^\d{1,4}$/);
 }
 //--------------------------------------
 const error = function (str, incorrectInp) {
@@ -190,7 +207,7 @@ const clear = function (container) {
     querySelect(container).value = '';
 }
 //------------------------------
-const clearForm = function (container) {
+const clearForm = function () {
     // clear but not reset toe form
     clear('#incorrectDateInp');
     clear('#incorrectMissionInp');
@@ -212,8 +229,79 @@ const getCurrDate = function () {
     console.log("date: " + date);
     return date;
 }
-
+//---------------------------------------
+const buttonsSaveHandle = function (res) {
+    for (let i = 1; i <= 3; i++) {
+        let saveBtns = querySelect('#imagesOutput' + i.toString()).getElementsByClassName('btn btn-info ml-2 mr-2');
+        for (let btn of saveBtns) {
+            btn.addEventListener('click', function () {
+                let id = btn.parentElement.getElementsByTagName('p')[1].innerHTML;
+                res.photos.forEach(p => {
+                    if (id === p.id.toString()) {
+                        let li = createNode('li');
+                        let a = createNode('a');
+                        a.setAttribute('href', p.img_src);
+                        a.setAttribute('target',"_blank" )
+                        a.innerHTML = "Image of: " + id + "<br>";
+                        li.appendChild(a)
+                        li.innerHTML += "Earth date: " + p.earth_date + ', Sol: ' + p.sol + ', Camera: ' + p.camera.name;
+                        querySelect('#infos').appendChild(li);
+                    }
+                });
+            })
+        }
+    }
+}
 //-------------------------------------
+const slideShow = function (){
+    let carousel = querySelect('#innerCarousel');
+    imgList.forEach(img => {
+        let img_src = img.image;
+        let camName = img.camera;
+        let date = img.date;
+        console.log(camName);
+        carousel.appendChild(createImageCarousel(img_src, camName, date, imgList.indexOf(img) ));
+        //querySelect('#infos').innerHTML += img_src;
+    });
+}
+//---------------------------------------
+const createImageCarousel = function (img_src, cameraName, dateMission, index){
+    let div = createNode('div');
+    index === 0 ? div.setAttribute('class', 'carousel-item active')
+        :  div.setAttribute('class', 'carousel-item');
+
+    let img = createNode('img');
+    img.setAttribute('src', img_src);
+    img.setAttribute('class', 'd-block w-100');
+    div.appendChild(img);
+
+    let divCap = createNode('div');
+    divCap.setAttribute('class', "carousel-caption d-none d-md-block")
+    div.appendChild(divCap);
+
+    let camName = createNode('h5');
+    camName.innerHTML = cameraName;
+    divCap.appendChild(camName);
+
+    let date = createNode('p');
+    date.innerHTML = dateMission;
+    divCap.appendChild(date);
+
+    return div;
+
+  //  appendNode(div, img, 'd-block w-100', '')
+}
+
+/*<div className="carousel-inner">
+    <div className="carousel-item active">
+        <img src="https://imgix.bustle.com/uploads/image/2020/3/4/f5bbc6e9-59cb-4c4a-b10c-3a81dedf21b6-pia23623-16.jpg?w=2000&h=640&fit=crop&crop=faces&auto=format%2Ccompress"
+            className="d-block w-100" alt="...">
+            <div className="carousel-caption d-none d-md-block">
+                <h5>First slide label</h5>
+                <p>Some representative placeholder content for the first slide.</p>
+            </div>
+    </div>*/
+//----------------------------------
 function status(response) {
     if (response.status >= 200 && response.status < 300) {
         return Promise.resolve(response)
@@ -268,8 +356,6 @@ querySelect("#imagesOutput").innerHTML += `<img src=${res.url}>`;*/
 
 /*    document.getElementById("username").nextElementSibling.classList.add("d-none");
     document.getElementById("username").classList.remove("is-invalid");*/
-
-
 
 
 //  let camName = res.photos[0].camera.name;
