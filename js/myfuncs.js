@@ -1,4 +1,13 @@
 const APIKEY = 'UsppJXiLnEkRVSJzaCP92eXcCZsZAnYAyM8AomWZ';
+var LANDING_DATE_CURIOSITY;
+var MAX_DATE_CURIOSITY;
+var MAX_SOL_CURIOSITY;
+var LANDING_DATE_OPPORTUNITY;
+var MAX_DATE_OPPORTUNITY;
+var MAX_SOL_OPPORTUNITY;
+var LANDING_DATE_SPIRIT;
+var MAX_DATE_SPIRIT;
+var MAX_SOL_SPIRIT;
 
 document.addEventListener('DOMContentLoaded', function () {
     querySelect("#searchBtn").addEventListener("click", getData);
@@ -18,12 +27,53 @@ document.addEventListener('DOMContentLoaded', function () {
         querySelect('#innerCarousel').innerHTML = '';
     });
 
-/*    $(document).ready(function (){
-        ('#searchBtn').tooltip();
-    })*/
 }, false);
-
 //-------------------------------------------------
+
+fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${APIKEY}`)
+    .then(status).then(json).then(function (res) {
+        console.log(res);
+        LANDING_DATE_CURIOSITY = res.photo_manifest.landing_date;
+        MAX_DATE_CURIOSITY = res.photo_manifest.max_date;
+        MAX_SOL_CURIOSITY = res.photo_manifest.max_sol;
+      /*  querySelect('#infos').innerHTML += LANDING_DATE_CURIOSITY + "<br>";
+        querySelect('#infos').innerHTML += MAX_DATE_CURIOSITY + "<br>";
+        querySelect('#infos').innerHTML += MAX_SOL_CURIOSITY + "<br>";*/
+    }).catch(function (err) {
+        console.log("catch: " + err);
+        querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    });
+//------------------------------------
+fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${APIKEY}`)
+    .then(status).then(json).then(function (res) {
+    console.log(res);
+    LANDING_DATE_OPPORTUNITY = res.photo_manifest.landing_date;
+    MAX_DATE_OPPORTUNITY = res.photo_manifest.max_date;
+    MAX_SOL_OPPORTUNITY = res.photo_manifest.max_sol;
+/*    querySelect('#infos').innerHTML += LANDING_DATE_OPPORTUNITY + "<br>";
+   querySelect('#infos').innerHTML += MAX_DATE_OPPORTUNITY + "<br>";
+    querySelect('#infos').innerHTML += MAX_SOL_OPPORTUNITY + "<br>";*/
+
+}).catch(function (err) {
+    console.log("catch: " + err);
+    querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+});
+//------------------------------------
+fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY}`)
+    .then(status).then(json).then(function (res) {
+    console.log(res);
+    LANDING_DATE_SPIRIT = res.photo_manifest.landing_date;
+    MAX_DATE_SPIRIT = res.photo_manifest.max_date;
+    MAX_SOL_SPIRIT = res.photo_manifest.max_sol;
+/*    querySelect('#infos').innerHTML += LANDING_DATE_SPIRIT + "<br>";
+    querySelect('#infos').innerHTML += MAX_DATE_SPIRIT + "<br>";
+    querySelect('#infos').innerHTML += MAX_SOL_SPIRIT + "<br>";*/
+
+}).catch(function (err) {
+    console.log("catch: " + err);
+    querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+});
+//------------------------------------
 
 let imgList = []
 let resList = []
@@ -52,13 +102,13 @@ class Image {
         appendNode(card, cardBody, "card-body", '');
 
         let date = createNode('p');
-        appendNode(cardBody, date, 'card-text', this.date);
+        appendNode(cardBody, date, 'card-text', "Date: " + this.date);
 
         let id = createNode('p');
-        appendNode(cardBody, id, 'card-text', this.id);
+        appendNode(cardBody, id, 'card-text',  this.id);
 
         let cam = createNode('p');
-        appendNode(cardBody, cam, 'card-text', this.camera);
+        appendNode(cardBody, cam, 'card-text', "Camera: " + this.camera);
 
         let mis = createNode('p');
         appendNode(cardBody, mis, 'card-text', this.mission);
@@ -89,6 +139,7 @@ const appendNode = function (parent, child, nameClass, inner) { // generic func
     child.innerHTML = inner;
     parent.appendChild(child);
 }
+
 //------------------------------------------
 async function getData() {
     clearForm();
@@ -96,47 +147,23 @@ async function getData() {
     const mission = getById('mission').value;
     const cam = getById('camera').value;
 
-    let date = new Date(dateInp);
-    if (isEarthDate(dateInp))
-       dateInp =  date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
-    querySelect('#infos').innerHTML = dateInp + "<br>";
+    if (isEarthDate(dateInp)) {
+        const date = new Date(dateInp);
+        dateInp = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+    }
 
-    if (!correctInputFormat(dateInp, mission, cam))
+    if (!correctInput(dateInp, mission, cam))
         return;
 
-    querySelect("#imagesOutput1").innerHTML = "<img src=https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif width=\"60\" height=\"60\" alt='...' >";
+    querySelect('#loading').style.display = "block";
+    querySelect("#loading").innerHTML = "<img src=https://64.media.tumblr.com/ec18887811b3dea8c69711c842de6bb9/tumblr_pabv7lGY7r1qza1qzo1_500.gifv  alt='...' >";// <!--width="60" height="60"-->
     setAttr('#date', 'class', 'form-control');
     setAttr('#mission', 'class', 'form-select');
     setAttr('#camera', 'class', 'form-select');
 
-    fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/${mission}?earth_date=${dateInp}&sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`)
-        .then(status)
-        .then(json)
-        .then(function (res) {
-            console.log(res);
-            let landingDate = res.photo_manifest.landing_date;
-            const maxDate = res.photo_manifest.max_date;
-            const maxSol = res.photo_manifest.max_sol;
-            querySelect('#infos').innerHTML += landingDate + "<br>";
-            querySelect('#infos').innerHTML += maxDate + "<br>";
-            querySelect('#infos').innerHTML += maxSol + "<br>";
-
-            if (!valid(landingDate, maxDate, maxSol, dateInp)) {
-              // return;
-            }
-        })
-        .catch(function (err) {
-            console.log("catch: " + err);
-            querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
-        });
-
-   // const apiMars = `https://api.nasa.gov/mars-photos/api/v1/rovers/`;;
     const url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`; // &sol=${dateInp}&camera=${cam}
-
     fetch(url)
-        .then(status)
-        .then(json)
-        .then(function (res) {
+        .then(status).then(json).then(function (res) {
             console.log(res);
 
             res.photos.forEach(p => {
@@ -156,6 +183,7 @@ async function getData() {
     setAttr('#incorrectCamInp', "class", "d-none");
     querySelect("#myForm").reset(); // reset the form
 }
+
 //----------------------------
 const getById = function (container) {// generic func
     return document.getElementById(container);
@@ -170,6 +198,7 @@ const setAttr = function (container, qualName, val) {// generic func
 }
 //--------------------------------------
 const displayImages = function () { // display list of tasks to the DOM
+    querySelect('#loading').style.display = "none";
     let col1 = querySelect("#imagesOutput1");
     let col2 = querySelect("#imagesOutput2");
     let col3 = querySelect("#imagesOutput3");
@@ -185,9 +214,9 @@ const displayImages = function () { // display list of tasks to the DOM
     });
 }
 //------------------------------------------------
-const correctInputFormat = function (date, mission, cam) {
+const correctInput = function (dateInp, mission, cam) {
     // check inputs and return true if all is correct inputs, else will show user what problem he have and return false
-    if (!validDate(date)) {
+    if (!validDate(dateInp)) {
         error('Please enter a valid format of date\n', "#incorrectDateInp");
         querySelect("#date").value = '';
         setAttr('#date', 'class', 'form-control is-invalid');
@@ -203,6 +232,27 @@ const correctInputFormat = function (date, mission, cam) {
         setAttr('#camera', 'class', 'form-select is-invalid');
         return false;
     }
+
+    let landingDate, maxDate, maxSol;
+    if (mission === "Curiosity"){
+        landingDate = LANDING_DATE_CURIOSITY;
+        maxDate = MAX_DATE_CURIOSITY;
+        maxSol = MAX_SOL_CURIOSITY;
+    }
+    else if (mission === "Opportunity"){
+        landingDate = LANDING_DATE_OPPORTUNITY;
+        maxDate = MAX_DATE_OPPORTUNITY;
+        maxSol = MAX_SOL_OPPORTUNITY;
+    }
+    else if (mission === "Spirit"){
+        landingDate = LANDING_DATE_SPIRIT;
+        maxDate = MAX_DATE_SPIRIT;
+        maxSol = MAX_SOL_SPIRIT;
+    }
+
+    if (!valid(landingDate, maxDate, maxSol, dateInp))
+        return false;
+
     return true;
 }
 //---------------------------------
@@ -212,7 +262,7 @@ const valid = function (landingDate, maxDate, maxSol, dateInp) {
         || (isSolDate(dateInp) && (dateInp > maxSol))) {
         if (isEarthDate(dateInp) && (dateInp < landingDate))
             error(`The mission you've selected required a date after ${landingDate}`, '#incorrectDateInp');
-        else if(isEarthDate(dateInp) && (dateInp > maxDate))
+        else if (isEarthDate(dateInp) && (dateInp > maxDate))
             error(`The mission you've selected required a date before max date: ${maxDate}`, '#incorrectDateInp');
         else if (isSolDate(dateInp) && dateInp > maxSol)
             error(`The mission you've selected required a date before max sol: ${maxSol}`, '#incorrectDateInp');
@@ -270,7 +320,12 @@ const buttonsSaveHandle = function () {
                     if (li.id === id)
                         exist = true;
                 });
-                if (exist) return;
+                if (exist){
+                    btn.setAttribute('data-bs-toggle', 'modal');
+                    btn.setAttribute('data-bs-target', '#saveModal');
+                    btn.click();
+                    return;
+                }
 
                 resList.forEach(obj => {
                     obj.photos.forEach(p => {
@@ -290,6 +345,7 @@ const buttonsSaveHandle = function () {
 //---------------------------
 const createJink = function (p, id) {
     let a = createNode('a');
+    a.setAttribute('id',  id);
     a.setAttribute('href', p.img_src);
     a.setAttribute('target', "_blank")
     a.innerHTML = "Image of: " + id + "<br>";
@@ -362,7 +418,6 @@ function status(response) {
         return Promise.reject(new Error(response.statusText))
     }
 }
-
 //-------------------------------------------
 function json(response) {
     return response.json()
