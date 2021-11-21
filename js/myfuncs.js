@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', function () {
         querySelect('#innerCarousel').innerHTML = '';
     });
 
+/*    $(document).ready(function (){
+        ('#searchBtn').tooltip();
+    })*/
 }, false);
 
 //-------------------------------------------------
@@ -86,21 +89,45 @@ const appendNode = function (parent, child, nameClass, inner) { // generic func
     child.innerHTML = inner;
     parent.appendChild(child);
 }
-
 //------------------------------------------
 async function getData() {
     clearForm();
-    const dateInp = getById("date").value.trim();
+    let dateInp = getById("date").value.trim();
     const mission = getById('mission').value;
     const cam = getById('camera').value;
 
-    if (!correctInput(dateInp, mission, cam))
+  //  let date = new Date(dateInp);
+   // dateInp =  date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+  //  querySelect('#infos').innerHTML += dateInp + "<br>";
+
+    if (!correctInputFormat(dateInp, mission, cam))
         return;
 
     querySelect("#imagesOutput1").innerHTML = "<img src=https://c.tenor.com/I6kN-6X7nhAAAAAj/loading-buffering.gif width=\"60\" height=\"60\" alt='...' >";
     setAttr('#date', 'class', 'form-control');
     setAttr('#mission', 'class', 'form-select');
     setAttr('#camera', 'class', 'form-select');
+
+    fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/${mission}?earth_date=${dateInp}&sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`)
+        .then(status)
+        .then(json)
+        .then(function (res) {
+            console.log(res);
+            let landingDate = res.photo_manifest.landing_date;
+            const maxDate = res.photo_manifest.max_date;
+            const maxSol = res.photo_manifest.max_sol;
+            querySelect('#infos').innerHTML += landingDate + "<br>";
+            querySelect('#infos').innerHTML += maxDate + "<br>";
+            querySelect('#infos').innerHTML += maxSol + "<br>";
+
+            if (!valid(landingDate, maxDate, maxSol, dateInp)) {
+              // return;
+            };
+        })
+        .catch(function (err) {
+            console.log("catch: " + err);
+            querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+        });
 
     const apiMars = `https://api.nasa.gov/mars-photos/api/v1/rovers/`;
     const url = apiMars + `${mission}/photos?earth_date=${dateInp}&sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`;
@@ -120,7 +147,7 @@ async function getData() {
         })
         .catch(function (err) {
             console.log("catch: " + err);
-            querySelect("#imagesOutput1").innerHTML = "Sorry, no photos at this date...";
+            querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
         });
 
     setAttr('#incorrectDateInp', "class", "d-none");
@@ -158,7 +185,7 @@ const displayImages = function () { // display list of tasks to the DOM
     });
 }
 //------------------------------------------------
-const correctInput = function (date, mission, cam) {
+const correctInputFormat = function (date, mission, cam) {
     // check inputs and return true if all is correct inputs, else will show user what problem he have and return false
     if (!validDate(date)) {
         error('Please enter a valid format of date\n', "#incorrectDateInp");
@@ -176,24 +203,24 @@ const correctInput = function (date, mission, cam) {
         setAttr('#camera', 'class', 'form-select is-invalid');
         return false;
     }
+    return true;
+}
+//---------------------------------
+const valid = function (landingDate, maxDate, maxSol, dateInp) {
+    if ((dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp < landingDate)
+        || (dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp > maxDate)
+        || (dateInp.match(/^\d{1,4}$/) && dateInp > maxSol)) {
+        if (dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp < landingDate)
+            error(`The mission you've selected required a date after ${landingDate}`, '#incorrectDateInp');
+        else if(dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp > maxDate)
+            error(`The mission you've selected required a date before max date: ${maxDate}`, '#incorrectDateInp');
+        else if (dateInp.match(/^\d{1,4}$/) && dateInp > maxSol)
+            error(`The mission you've selected required a date before max sol: ${maxSol}`, '#incorrectDateInp');
 
-    let landingDate;
-    if (date.match(/^\d{4}-\d{1,2}-\d{1,2}$/)) {
-        if (mission === "Curiosity")
-            landingDate = new Date('August 07, 2012').toJSON().slice(0, 10); // 2012-08-06
-        else if (mission === "Opportunity")
-            landingDate = new Date('July 09, 2003').toJSON().slice(0, 10); // July 8, 2003
-        else if (mission === "Spirit")
-            landingDate = new Date('June 11, 2003').toJSON().slice(0, 10); // June 10, 2003
-
-        if (date < landingDate || date > getCurrDate()) {
-            error(`The mission you've selected required a date after ${landingDate} and before today's date: ${getCurrDate()}`, '#incorrectDateInp');
-            setAttr('#date', 'class', 'form-select is-invalid');
-            querySelect("#date").value = '';
-            return false;
-        }
+        setAttr('#date', 'class', 'form-select is-invalid');
+        querySelect("#date").value = '';
+        return false;
     }
-
     return true;
 }
 //---------------------------------
@@ -222,15 +249,6 @@ const clearForm = function () {
     setAttr('#mission', 'class', 'form-select');
     setAttr('#camera', 'class', 'form-select');
 }
-//-------------------------------------
-const getCurrDate = function () {
-    let date = new Date();
-    const dd = date.getDate();
-    const mm = date.getMonth() + 1;
-    const yyyy = date.getFullYear();
-    date = [yyyy, mm, dd].join('-');
-    return date;
-}
 //---------------------------------------
 const buttonsSaveHandle = function () {
     for (let i = 1; i <= 3; i++) {
@@ -238,16 +256,24 @@ const buttonsSaveHandle = function () {
         for (let btn of saveBtns) {
             btn.addEventListener('click', function () {
                 const id = btn.parentElement.getElementsByTagName('p')[1].innerHTML;
+                let exist = false;
+                const arr = querySelect('#infos').querySelectorAll('li');
+                arr.forEach(li => {
+                    if (li.id === id)
+                        exist = true;
+                });
+                if (exist) return;
+
                 resList.forEach(obj => {
                     obj.photos.forEach(p => {
                         if (id === p.id.toString()) {
                             let li = createNode('li');
+                            li.id = id;
                             li.appendChild(createJink(p, id));
                             li.innerHTML += "Earth date: " + p.earth_date + ', Sol: ' + p.sol + ', Camera: ' + p.camera.name;
                             querySelect('#infos').appendChild(li);
                         }
                     })
-
                 });
             });
         }
@@ -271,8 +297,9 @@ const slideShow = function () {
         ind.appendChild(createBtn(img));
     });
 }
+
 //------------------------------------
-function createBtn (img){
+function createBtn(img) {
     let btn = createNode('button');
     btn.setAttribute('data-bs-target', '#carousel');
     if (imgList.indexOf(img) === 0) {
@@ -284,6 +311,7 @@ function createBtn (img){
     btn.setAttribute('aria-label', 'Slide' + imgList.indexOf(img).toString());
     return btn;
 }
+
 //---------------------------------------
 const createImageCarousel = function (img_src, cameraName, dateMission, index) {
     let div = createNode('div');
@@ -385,3 +413,14 @@ querySelect("#imagesOutput").innerHTML += `<img src=${res.url}>`;*/
 // querySelect("#imagesOutput").innerHTML = landingDate;
 
 // querySelect("#imagesOutput").innerHTML += p.camera.name + "<br>";
+
+
+/*//-------------------------------------
+const getCurrDate = function () {
+    let date = new Date();
+    const dd = date.getDate();
+    const mm = date.getMonth() + 1;
+    const yyyy = date.getFullYear();
+    date = [yyyy, mm, dd].join('-');
+    return date;
+}*/
