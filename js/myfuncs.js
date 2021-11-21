@@ -97,7 +97,9 @@ async function getData() {
     const cam = getById('camera').value;
 
     let date = new Date(dateInp);
-    dateInp =  date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+    if (isEarthDate(dateInp))
+       dateInp =  date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+    querySelect('#infos').innerHTML = dateInp + "<br>";
 
     if (!correctInputFormat(dateInp, mission, cam))
         return;
@@ -205,14 +207,14 @@ const correctInputFormat = function (date, mission, cam) {
 }
 //---------------------------------
 const valid = function (landingDate, maxDate, maxSol, dateInp) {
-    if ((dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp < landingDate)
-        || (dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp > maxDate)
-        || (dateInp.match(/^\d{1,4}$/) && (dateInp > maxSol))) {
-        if (dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && (dateInp < landingDate))
+    if ((isEarthDate(dateInp) && (dateInp < landingDate))
+        || (isEarthDate(dateInp) && (dateInp > maxDate))
+        || (isSolDate(dateInp) && (dateInp > maxSol))) {
+        if (isEarthDate(dateInp) && (dateInp < landingDate))
             error(`The mission you've selected required a date after ${landingDate}`, '#incorrectDateInp');
-        else if(dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && (dateInp > maxDate))
+        else if(isEarthDate(dateInp) && (dateInp > maxDate))
             error(`The mission you've selected required a date before max date: ${maxDate}`, '#incorrectDateInp');
-        else if (dateInp.match(/^\d{1,4}$/) && dateInp > maxSol)
+        else if (isSolDate(dateInp) && dateInp > maxSol)
             error(`The mission you've selected required a date before max sol: ${maxSol}`, '#incorrectDateInp');
 
         setAttr('#date', 'class', 'form-select is-invalid');
@@ -221,9 +223,17 @@ const valid = function (landingDate, maxDate, maxSol, dateInp) {
     }
     return true;
 }
+//----------------------------------
+const isEarthDate = (date) => {
+    return date.match(/^\d{4}-\d{1,2}-\d{1,2}$/);
+}
+//--------------------------------
+const isSolDate = (date) => {
+    return date.match(/^\d{1,4}$/);
+}
 //---------------------------------
 const validDate = function (date) {
-    return date.match(/^\d{4}-\d{1,2}-\d{1,2}$/) || date.match(/^\d{1,4}$/);
+    return isEarthDate(date) || isSolDate(date);
 }
 //--------------------------------------
 const error = function (str, incorrectInp) {
