@@ -1,13 +1,7 @@
 const APIKEY = 'UsppJXiLnEkRVSJzaCP92eXcCZsZAnYAyM8AomWZ';
-var LANDING_DATE_CURIOSITY;
-var MAX_DATE_CURIOSITY;
-var MAX_SOL_CURIOSITY;
-var LANDING_DATE_OPPORTUNITY;
-var MAX_DATE_OPPORTUNITY;
-var MAX_SOL_OPPORTUNITY;
-var LANDING_DATE_SPIRIT;
-var MAX_DATE_SPIRIT;
-var MAX_SOL_SPIRIT;
+var LANDING_DATE_CURIOSITY, MAX_DATE_CURIOSITY, MAX_SOL_CURIOSITY;
+var LANDING_DATE_OPPORTUNITY, MAX_DATE_OPPORTUNITY, MAX_SOL_OPPORTUNITY;
+var LANDING_DATE_SPIRIT, MAX_DATE_SPIRIT, MAX_SOL_SPIRIT;
 
 document.addEventListener('DOMContentLoaded', function () {
     querySelect("#searchBtn").addEventListener("click", getData);
@@ -40,7 +34,6 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${API
         querySelect('#infos').innerHTML += MAX_DATE_CURIOSITY + "<br>";
         querySelect('#infos').innerHTML += MAX_SOL_CURIOSITY + "<br>";*/
     }).catch(function (err) {
-        console.log("catch: " + err);
         querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
     });
 //------------------------------------
@@ -54,10 +47,9 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${A
    querySelect('#infos').innerHTML += MAX_DATE_OPPORTUNITY + "<br>";
     querySelect('#infos').innerHTML += MAX_SOL_OPPORTUNITY + "<br>";*/
 
-}).catch(function (err) {
-    console.log("catch: " + err);
-    querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
-});
+    }).catch(function (err) {
+        querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    });
 //------------------------------------
 fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY}`)
     .then(status).then(json).then(function (res) {
@@ -69,18 +61,17 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY
     querySelect('#infos').innerHTML += MAX_DATE_SPIRIT + "<br>";
     querySelect('#infos').innerHTML += MAX_SOL_SPIRIT + "<br>";*/
 
-}).catch(function (err) {
-    console.log("catch: " + err);
-    querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
-});
+    }).catch(function (err) {
+        querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    });
 //------------------------------------
 
 let imgList = []
 let resList = []
 
 class Image {
-    constructor(image, date, id, mission, camera) {
-        this.image = image;
+    constructor(image_src, date, id, mission, camera) {
+        this.image_src = image_src;
         this.date = date;
         this.id = id;
         this.mission = mission;
@@ -89,13 +80,12 @@ class Image {
 
     createDiv() {
         let myDiv = createNode('div');
-
         let card = createNode('div');
         card.setAttribute('style', "width: 18rem;");
         appendNode(myDiv, card, 'card  border border-5 rounded-3  mb-2', '')
 
         let image = createNode('img');
-        image.setAttribute('src', this.image)
+        image.setAttribute('src', this.image_src)
         appendNode(card, image, 'card-img-top', '')
 
         let cardBody = createNode('div');
@@ -117,11 +107,9 @@ class Image {
         appendNode(cardBody, btnSave, 'btn btn-info ml-2 mr-2', 'Save');
 
         let a = createNode('a');
-        a.setAttribute('href', this.image);
-        a.setAttribute('target', "_blank")
-        // setAttr('a', 'href', this.image)
+        a.setAttribute('href', this.image_src);
+        a.setAttribute('target', "_blank");
         appendNode(cardBody, a, '', '');
-
         let btnFullSize = createNode('button');
         appendNode(a, btnFullSize, 'btn btn-primary ml-2 mr-2', "Full size");
 
@@ -139,7 +127,6 @@ const appendNode = function (parent, child, nameClass, inner) { // generic func
     child.innerHTML = inner;
     parent.appendChild(child);
 }
-
 //------------------------------------------
 async function getData() {
     clearForm();
@@ -147,10 +134,15 @@ async function getData() {
     const mission = getById('mission').value;
     const cam = getById('camera').value;
 
+  //  let date;
+    let url;
     if (isEarthDate(dateInp)) {
-        const date = new Date(dateInp);
-        dateInp = date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+        const d = new Date(dateInp);
+        dateInp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+        url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&camera=${cam}&api_key=${APIKEY}`
     }
+    else if (isSolDate(dateInp))
+         url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`
 
     if (!correctInput(dateInp, mission, cam))
         return;
@@ -160,8 +152,7 @@ async function getData() {
     setAttr('#date', 'class', 'form-control');
     setAttr('#mission', 'class', 'form-select');
     setAttr('#camera', 'class', 'form-select');
-
-    const url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`; // &sol=${dateInp}&camera=${cam}
+    
     fetch(url)
         .then(status).then(json).then(function (res) {
             console.log(res);
