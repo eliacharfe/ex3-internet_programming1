@@ -96,9 +96,8 @@ async function getData() {
     const mission = getById('mission').value;
     const cam = getById('camera').value;
 
-  //  let date = new Date(dateInp);
-   // dateInp =  date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
-  //  querySelect('#infos').innerHTML += dateInp + "<br>";
+    let date = new Date(dateInp);
+    dateInp =  date.getFullYear() + '-' + ('0' + (date.getMonth()+1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
 
     if (!correctInputFormat(dateInp, mission, cam))
         return;
@@ -122,15 +121,15 @@ async function getData() {
 
             if (!valid(landingDate, maxDate, maxSol, dateInp)) {
               // return;
-            };
+            }
         })
         .catch(function (err) {
             console.log("catch: " + err);
             querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
         });
 
-    const apiMars = `https://api.nasa.gov/mars-photos/api/v1/rovers/`;
-    const url = apiMars + `${mission}/photos?earth_date=${dateInp}&sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`;
+   // const apiMars = `https://api.nasa.gov/mars-photos/api/v1/rovers/`;;
+    const url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`; // &sol=${dateInp}&camera=${cam}
 
     fetch(url)
         .then(status)
@@ -155,7 +154,6 @@ async function getData() {
     setAttr('#incorrectCamInp', "class", "d-none");
     querySelect("#myForm").reset(); // reset the form
 }
-
 //----------------------------
 const getById = function (container) {// generic func
     return document.getElementById(container);
@@ -209,10 +207,10 @@ const correctInputFormat = function (date, mission, cam) {
 const valid = function (landingDate, maxDate, maxSol, dateInp) {
     if ((dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp < landingDate)
         || (dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp > maxDate)
-        || (dateInp.match(/^\d{1,4}$/) && dateInp > maxSol)) {
-        if (dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp < landingDate)
+        || (dateInp.match(/^\d{1,4}$/) && (dateInp > maxSol))) {
+        if (dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && (dateInp < landingDate))
             error(`The mission you've selected required a date after ${landingDate}`, '#incorrectDateInp');
-        else if(dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && dateInp > maxDate)
+        else if(dateInp.match(/^\d{4}-\d{1,2}-\d{1,2}$/) && (dateInp > maxDate))
             error(`The mission you've selected required a date before max date: ${maxDate}`, '#incorrectDateInp');
         else if (dateInp.match(/^\d{1,4}$/) && dateInp > maxSol)
             error(`The mission you've selected required a date before max sol: ${maxSol}`, '#incorrectDateInp');
