@@ -33,7 +33,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${API
       /*  querySelect('#infos').innerHTML += LANDING_DATE_CURIOSITY + "<br>";
         querySelect('#infos').innerHTML += MAX_DATE_CURIOSITY + "<br>";
         querySelect('#infos').innerHTML += MAX_SOL_CURIOSITY + "<br>";*/
-    }).catch(function (err) {
+    }).catch(function () {
         querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
     });
 //------------------------------------
@@ -47,7 +47,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${A
    querySelect('#infos').innerHTML += MAX_DATE_OPPORTUNITY + "<br>";
     querySelect('#infos').innerHTML += MAX_SOL_OPPORTUNITY + "<br>";*/
 
-    }).catch(function (err) {
+    }).catch(function () {
         querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
     });
 //------------------------------------
@@ -61,7 +61,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY
     querySelect('#infos').innerHTML += MAX_DATE_SPIRIT + "<br>";
     querySelect('#infos').innerHTML += MAX_SOL_SPIRIT + "<br>";*/
 
-    }).catch(function (err) {
+    }).catch(function () {
         querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
     });
 //------------------------------------
@@ -134,7 +134,6 @@ async function getData() {
     const mission = getById('mission').value;
     const cam = getById('camera').value;
 
-  //  let date;
     let url;
     if (isEarthDate(dateInp)) {
         const d = new Date(dateInp);
@@ -148,11 +147,11 @@ async function getData() {
         return;
 
     querySelect('#loading').style.display = "block";
-    querySelect("#loading").innerHTML = "<img src=https://64.media.tumblr.com/ec18887811b3dea8c69711c842de6bb9/tumblr_pabv7lGY7r1qza1qzo1_500.gifv  alt='...' >";// <!--width="60" height="60"-->
+    querySelect("#loading").innerHTML = "<img src=https://64.media.tumblr.com/ec18887811b3dea8c69711c842de6bb9/tumblr_pabv7lGY7r1qza1qzo1_500.gifv  alt='...' >";
     setAttr('#date', 'class', 'form-control');
     setAttr('#mission', 'class', 'form-select');
     setAttr('#camera', 'class', 'form-select');
-    
+
     fetch(url)
         .then(status).then(json).then(function (res) {
             console.log(res);
@@ -241,10 +240,7 @@ const correctInput = function (dateInp, mission, cam) {
         maxSol = MAX_SOL_SPIRIT;
     }
 
-    if (!valid(landingDate, maxDate, maxSol, dateInp))
-        return false;
-
-    return true;
+    return valid(landingDate, maxDate, maxSol, dateInp);
 }
 //---------------------------------
 const valid = function (landingDate, maxDate, maxSol, dateInp) {
@@ -306,8 +302,8 @@ const buttonsSaveHandle = function () {
             btn.addEventListener('click', function () {
                 const id = btn.parentElement.getElementsByTagName('p')[1].innerHTML;
                 let exist = false;
-                const arr = querySelect('#infos').querySelectorAll('li');
-                arr.forEach(li => {
+                const list = querySelect('#infos').querySelectorAll('li');
+                list.forEach(li => {
                     if (li.id === id)
                         exist = true;
                 });
