@@ -80,7 +80,6 @@ const myModul = (() => {
     let resList = []
     const publicData = {}
 
-
     class Image {
         constructor(image_src, date, id, mission, camera) {
             this.image_src = image_src;
@@ -143,9 +142,9 @@ const myModul = (() => {
 //------------------------------------------
     publicData.getData = async function () {
         clearForm();
-        let dateInp = getById("date").value.trim();
-        const mission = getById('mission').value;
-        const cam = getById('camera').value;
+        let dateInp = myModul.querySelect("#date").value.trim();
+        const mission = myModul.querySelect('#mission').value;
+        const cam = myModul.querySelect('#camera').value;
 
         let url;
         if (validationModul.isEarthDate(dateInp)) {
@@ -184,11 +183,6 @@ const myModul = (() => {
         myModul.setAttr('#incorrectMissionInp', "class", "d-none");
         myModul.setAttr('#incorrectCamInp', "class", "d-none");
         myModul.querySelect("#myForm").reset(); // reset the form
-    }
-
-//----------------------------
-    const getById = function (container) {// generic func
-        return document.getElementById(container);
     }
 //----------------------------
     publicData.querySelect = function (container) {// generic func
