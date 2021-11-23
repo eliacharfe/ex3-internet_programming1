@@ -1,7 +1,7 @@
 const APIKEY = 'UsppJXiLnEkRVSJzaCP92eXcCZsZAnYAyM8AomWZ';
-var LANDING_DATE_CURIOSITY, MAX_DATE_CURIOSITY, MAX_SOL_CURIOSITY;
-var LANDING_DATE_OPPORTUNITY, MAX_DATE_OPPORTUNITY, MAX_SOL_OPPORTUNITY;
-var LANDING_DATE_SPIRIT, MAX_DATE_SPIRIT, MAX_SOL_SPIRIT;
+var LANDING_DATE_CURIOSITY, MAX_DATE_CURIOSITY, MAX_SOL_CURIOSITY,
+    LANDING_DATE_OPPORTUNITY, MAX_DATE_OPPORTUNITY, MAX_SOL_OPPORTUNITY,
+    LANDING_DATE_SPIRIT, MAX_DATE_SPIRIT, MAX_SOL_SPIRIT;
 
 document.addEventListener('DOMContentLoaded', function () {
     myModul.querySelect("#searchBtn").addEventListener("click", myModul.getData);
@@ -38,8 +38,8 @@ function json(response) {
 }
 
 //---------------------------------
-const inisializeModul = (() => {
-    let publicData = {}
+/*const inisializeModul = (() => {
+    let publicData = {}*/
     fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${APIKEY}`)
         .then(status).then(json).then(function (res) {
         console.log(res);
@@ -70,8 +70,10 @@ const inisializeModul = (() => {
         myModul.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
     });
 
+/*
     return publicData;
 })();
+*/
 
 
 //------------------------------------

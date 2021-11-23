@@ -25,7 +25,7 @@
 
 <div class="text-center">
 
-    <div class="card bg-dark text-white ml-3 mr-3">
+    <div class="card bg-dark text-white ml-5 mr-5 mt-3">
         <img src="https://imgix.bustle.com/uploads/image/2020/3/4/f5bbc6e9-59cb-4c4a-b10c-3a81dedf21b6-pia23623-16.jpg?w=2000&h=640&fit=crop&crop=faces&auto=format%2Ccompress"
              class="card-img" alt="..." width="30" height="200">
         <div class="card-img-overlay">
@@ -36,18 +36,6 @@
             </div>
         </div>
     </div>
-    <!--
-        <div class="container">
-            <img src=https://imgix.bustle.com/uploads/image/2020/3/4/f5bbc6e9-59cb-4c4a-b10c-3a81dedf21b6-pia23623-16.jpg?w=2000&h=640&fit=crop&crop=faces&auto=format%2Ccompress
-                 class="img-fluid" width="600" height="2000" alt="Responsive image">
-
-            <div class="card " style="width: 25rem;">
-                <div class="card-body">
-                    <h3 class="card-title">Mars images browser</h3>
-                    <p class="card-text">Browse NASA Mars images and save your preferred ones</p>
-                    <a class="btn btn-primary" role="button" data-bs-toggle="modal" data-bs-target="#myModal">Whom am I</a>
-                </div>
-            </div>-->
 
     <div class="text-center" id="loading"></div>
     <p></p>
@@ -58,10 +46,22 @@
     <div class="row">
         <div class="col-lg-6 ">
 
-            <div class="p-1 mb-2 " style="background-color: #80DEEA">
+            <nav class="navbar navbar-expand-lg navbar-light bg-info border border-primary  rounded-3 py-0">
+                <div class="container">
+                    <span class="navbar-text h4 rounded mb-0">Search for Images:</span>
+                </div>
+            </nav>
+
+            <!--           <nav class="navbar navbar-light bg-info p-1">
+             <span class="navbar-text h4 ">
+               Navbar text with an inline element
+             </span>
+                       </nav>-->
+
+            <!--<div class="p-1 mb-2 " style="background-color: #80DEEA">
                 <h4 class="text-info ">Search for Images:</h4>
             </div>
-
+-->
             <div id="mainDiv">
 
                 <form class="mb-3" id="myForm" method="post" autocomplete="on">
@@ -100,7 +100,11 @@
                     </div>
                     <div id="incorrectCamInp"></div>
                 </form>
-                <button type="button" class="btn btn-outline-info mb-3" data-toggle="tooltip" data-bs-toggle="popover" title="Popover title" data-bs-content="And here's some amazing content. It's very engaging. Right?" id="searchBtn">Search</button>
+                <button type="button" class="btn btn-outline-info mb-3" data-toggle="tooltip" data-bs-toggle="popover"
+                        title="Popover title"
+                        data-bs-content="And here's some amazing content. It's very engaging. Right?" id="searchBtn">
+                    Search
+                </button>
                 <button type="reset" class="btn btn-outline-info mb-3" id="clearBtn">Clear</button>
 
             </div>
@@ -108,25 +112,31 @@
         </div>
 
         <div class="col-lg-6 ">
-            <div class="p-1 mb-2 " style="background-color: #9ec9f3">
-                <h4 class="text-primary">Saved Images</h4>
-            </div>
-            <div>
-                <button class="btn btn-outline-primary mb-2" id="slideShow">Start Slide Show</button>
-                <button class="btn btn-outline-primary mb-2" id="stopSlideShow">Stop Slide Show</button>
+            <nav class="navbar navbar-light border border-info  rounded-5 rounded-3 py-0 mb-3"
+                 style="background-color: #9ec9f3">
+                <div class="container rounded">
+                    <span class="navbar-text text-primary h4 mb-0">Saved Images</span>
+                </div>
+            </nav>
+            <!-- <div class="p-1 mb-2 " style="background-color: #9ec9f3">
+                 <h4 class="text-primary">Saved Images</h4>
+             </div>
+             <div>-->
+            <button class="btn btn-outline-primary mb-2" id="slideShow">Start Slide Show</button>
+            <button class="btn btn-outline-primary mb-2" id="stopSlideShow">Stop Slide Show</button>
 
-                <ol id="infos"></ol>
-            </div>
+            <ol id="infos"></ol>
         </div>
     </div>
+</div>
+
+<div class="row">
 
     <div class="row">
 
-        <div class="row">
+        <div class="col-xl-3 col-md-2"></div>
 
-            <div class="col-xl-3 col-md-2"></div>
-
-            <div class="col-xl-6 col-md-8">
+        <div class="col-xl-6 col-md-8">
             <div id="carousel" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-indicators" id="indicator">
                 </div>
@@ -143,32 +153,40 @@
                     <span class="visually-hidden">Next</span>
                 </button>
             </div>
-            </div>
-
-            <div class="col-xl-3 col-md-2"></div>
         </div>
 
-        <div class="p-1 mb-2 ml-3 mr-3 " style="background-color: #80DEEA">
-            <h4 class="text-info">Search result:</h4>
-        </div>
-        <div class="col">
-            <div id="imagesOutput1"></div>
-        </div>
-
-        <div class="col">
-            <div id="imagesOutput2"></div>
-        </div>
-
-        <div class="col">
-            <div id="imagesOutput3"></div>
-        </div>
+        <div class="col-xl-3 col-md-2"></div>
     </div>
-    <!--   <img src="" id="image" alt="Mars Photo" width="300px" height=auto style="display: none">-->
+</div>
 
-    <!--  <div id="imagesOutput">
-      </div>-->
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-info border border-primary  rounded-3 py-0">
+        <div class="container">
+            <span class="navbar-text h4 rounded mb-0">Search result:</span>
+        </div>
+    </nav>
 
-    <p><br><br></p>
+    <!--    <div class="p-1 mb-2 ml-3 mr-3 " style="background-color: #80DEEA">
+            <h4 class="text-info">Search result:</h4>
+        </div>-->
+    <div class="col">
+        <div id="imagesOutput1"></div>
+    </div>
+
+    <div class="col">
+        <div id="imagesOutput2"></div>
+    </div>
+
+    <div class="col">
+        <div id="imagesOutput3"></div>
+    </div>
+</div>
+<!--   <img src="" id="image" alt="Mars Photo" width="300px" height=auto style="display: none">-->
+
+<!--  <div id="imagesOutput">
+  </div>-->
+
+<p><br><br></p>
 
 </div>
 
@@ -190,7 +208,7 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -209,7 +227,7 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-info" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -250,7 +268,6 @@ July 8, 2003
                             aria-label="Slide 4"></button>
                     <button type="button" data-bs-target="#carousel" data-bs-slide-to="4"
                             aria-label="Slide 5"></button>-->
-
 
 
 <!--<div class="carousel-item active">
