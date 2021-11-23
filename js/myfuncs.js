@@ -234,14 +234,20 @@ const myModul = (() => {
 
             let landingDate, maxDate, maxSol;
             if (mission === "Curiosity") {
+                if (cam === "PANCAM" || cam === "MINITES")
+                  return errorCamera(mission, cam);
                 landingDate = LANDING_DATE_CURIOSITY;
                 maxDate = MAX_DATE_CURIOSITY;
                 maxSol = MAX_SOL_CURIOSITY;
             } else if (mission === "Opportunity") {
+                if (cam === "MAST" || cam === "CHEMCAM" || cam === "MAHLI" || cam === "MARDI")
+                   return errorCamera(mission, cam);
                 landingDate = LANDING_DATE_OPPORTUNITY;
                 maxDate = MAX_DATE_OPPORTUNITY;
                 maxSol = MAX_SOL_OPPORTUNITY;
             } else if (mission === "Spirit") {
+                if (cam === "MAST" || cam === "CHEMCAM" || cam === "MAHLI" || cam === "MARDI")
+                   return errorCamera(mission, cam);
                 landingDate = LANDING_DATE_SPIRIT;
                 maxDate = MAX_DATE_SPIRIT;
                 maxSol = MAX_SOL_SPIRIT;
@@ -283,6 +289,13 @@ const myModul = (() => {
         const error = function (str, incorrectInp) {
             myModul.querySelect(incorrectInp).innerHTML = str;
             myModul.setAttr(incorrectInp, "class", "alert alert-danger");
+        }
+        //----------------------
+        const errorCamera = function (mission, cam) {
+            error(`${mission} has no ${cam} camera`, '#incorrectCamInp');
+            myModul.setAttr('#camera', 'class', 'form-select is-invalid');
+            myModul.querySelect("#camera").value = '';
+            return  false;
         }
 
         return publicDataValidation;
