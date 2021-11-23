@@ -216,20 +216,17 @@ const myModul = (() => {
         publicDataValidation.correctInput = function (dateInp, mission, cam) {
             // check inputs and return true if all is correct inputs, else will show user what problem he have and return false
             if (!validDate(dateInp)) {
-                error('Please enter a valid format of date\n', "#incorrectDateInp");
                 myModul.querySelect("#date").value = '';
                 myModul.setAttr('#date', 'class', 'form-control is-invalid');
-                return false;
+                return  error('Please enter a valid format of date\n', "#incorrectDateInp");
             }
             if (mission === "Choose a mission") {
-                error('No such mission, please select a mission\n', '#incorrectMissionInp');
                 myModul.setAttr('#mission', 'class', 'form-select is-invalid');
-                return false;
+                return error('No such mission, please select a mission\n', '#incorrectMissionInp');
             }
             if (cam === "Choose a camera") {
-                error('No such camera, please select a camera from the options\n', '#incorrectCamInp');
                 myModul.setAttr('#camera', 'class', 'form-select is-invalid');
-                return false;
+                return error('No such camera, please select a camera from the options\n', '#incorrectCamInp');
             }
 
             let landingDate, maxDate, maxSol;
@@ -289,12 +286,13 @@ const myModul = (() => {
         const error = function (str, incorrectInp) {
             myModul.querySelect(incorrectInp).innerHTML = str;
             myModul.setAttr(incorrectInp, "class", "alert alert-danger");
+            return false;
         }
         //----------------------
         const errorCamera = function (mission, cam) {
             error(`${mission} has no ${cam} camera`, '#incorrectCamInp');
             myModul.setAttr('#camera', 'class', 'form-select is-invalid');
-            myModul.querySelect("#camera").value = '';
+            myModul.querySelect("#camera").selectedIndex = 0;
             return  false;
         }
 
