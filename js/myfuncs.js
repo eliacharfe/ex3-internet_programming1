@@ -77,22 +77,16 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY
 
 // Validation Modul /////////////////////
 const validationModule = (() => {
-    const publicDataValidation = {}
 
-    publicDataValidation.correctInput = function (dateInp, mission, cam) {
+    const correctInput = function (dateInp, mission, cam) {
         // check inputs and return true if all is correct inputs, else will show user what problem he have and return false
-        if (!validDate(dateInp)) {
-            // myModule.querySelect("#date").value = '';
+        if (!validDate(dateInp))
             return error('Please enter a valid format of date\n', "#incorrectDateInp", '#date', 'form-control is-invalid');
-        }
-        if (!validationModule.isExistDate(dateInp)) {
-            // myModule.querySelect("#date").value = '';
+        if (!isExistDate(dateInp))
             return error("This date does not exist", "#incorrectDateInp", '#date', 'form-control is-invalid');
-        }
 
         if (mission === "Choose a mission")
             return error('No such mission, please select a mission\n', '#incorrectMissionInp', '#mission', 'form-select is-invalid');
-
         if (cam === "Choose a camera")
             return error('No such camera, please select a camera from the options\n', '#incorrectCamInp', '#camera', 'form-select is-invalid');
 
@@ -117,25 +111,24 @@ const validationModule = (() => {
             maxSol = MAX_SOL_SPIRIT;
         }
 
-        return valid(landingDate, maxDate, maxSol, dateInp);
+        return validMissionCamDate(landingDate, maxDate, maxSol, dateInp);
     }
 //---------------------------------
-    const valid = function (landingDate, maxDate, maxSol, dateInp) {
+    const validMissionCamDate = function (landingDate, maxDate, maxSol, dateInp) {
         if (validationModule.isEarthDate(dateInp) && (dateInp < landingDate))
             return error(`The mission you've selected required a date after ${landingDate}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
         else if (validationModule.isEarthDate(dateInp) && (dateInp > maxDate))
             return error(`The mission you've selected required a date before max date: ${maxDate}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
         else if (validationModule.isSolDate(dateInp) && dateInp > maxSol)
             return error(`The mission you've selected required a date before max sol: ${maxSol}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
-        
         return true;
     }
 //----------------------------------
-    publicDataValidation.isEarthDate = (date) => {
+    const isEarthDate = (date) => {
         return date.match(/^\d{4}-\d{1,2}-\d{1,2}$/);
     }
 //--------------------------------
-    publicDataValidation.isSolDate = (date) => {
+    const isSolDate = (date) => {
         return date.match(/^\d{1,4}$/);
     }
 //---------------------------------
@@ -157,25 +150,29 @@ const validationModule = (() => {
         return error(`${mission} has no ${cam} camera`, '#incorrectCamInp');
     }
     //---------------------------------
-    publicDataValidation.isExistDate = function (date) {
+    const isExistDate = function (date) {
         let d = new Date(date);
         return d instanceof Date && !isNaN(d.getTime());
     }
 
-    return publicDataValidation;
+    return {
+        correctInput: correctInput,
+        isEarthDate: isEarthDate,
+        isSolDate: isSolDate
+    }
 })();
 //----------------------------//////////////////////////
 //------------------------------------
 const classesModule = (() => {
-    const publicData = {};
-
-    publicData.Image = class Image {
-        constructor(image_src, date, id, mission, camera) {
+    const Image = class Image {
+        constructor(image_src, date, id, mission, camera, earth_date, sol) {
             this.image_src = image_src;
             this.date = date;
             this.id = id;
             this.mission = mission;
             this.camera = camera;
+            this.earth_date = earth_date;
+            this.sol = sol;
         }
 
         createDiv() {
@@ -196,31 +193,63 @@ const classesModule = (() => {
                 </div>
             </div>`;
         }
+
+        //----------------------------------
+        appendCardToHtml = (where, element) => {
+            where.insertAdjacentHTML('beforeend', element.createDiv()); // where.appendChild(element.createDiv());
+        }
     }
 
-    /*publicData.myImages = class {
+    const ImagesList = class {
         constructor() {
             this.list = [];
         }
 
-        add(todo) {
-            this.list.push(todo);
+        add(img) {
+            this.list.push(img);
         }
 
-        getLast() {
-            return this.list[this.list.length-1];
+        indexOf(i) {
+            return this.list.indexOf(i);
         }
 
-    }*/
-    return publicData;
+        //----------------
+        foreach = function (callback) {
+            if (callback && typeof callback === 'function') {
+                for (let i = 0; i < this.list.length; i++) {
+                    callback(this.list[i], i, this.list);
+                }
+            }
+        };
+
+        //----------------------------------
+        generateHTML() {
+            myModule.querySelect('#loading').style.display = "none";
+            let col1 = myModule.querySelect("#imagesOutput1");
+            let col2 = myModule.querySelect("#imagesOutput2");
+            let col3 = myModule.querySelect("#imagesOutput3");
+            col1.innerHTML = col2.innerHTML = col3.innerHTML = ''; // clear divs
+
+            this.list.forEach(img => {
+                if (this.list.indexOf(img) % 3 === 0)
+                    img.appendCardToHtml(col1, img);
+                else if (this.list.indexOf(img) % 3 === 1)
+                    img.appendCardToHtml(col2, img);
+                else if (this.list.indexOf(img) % 3 === 2)
+                    img.appendCardToHtml(col3, img);
+            });
+        }
+    }
+    return {
+        Image: Image,
+        ImagesList: ImagesList
+    }
 })();
-
+//--------------------------------------------------
 const myModule = (() => {
-    let publicData = {}
-    let imgList = []
-    let resList = []
+    let imgList = new classesModule.ImagesList();
 
-    publicData.getData = function () {
+    const getData = function () {
         clearForm();
         let dateInp = myModule.querySelect("#date").value.trim();
         const mission = myModule.querySelect('#mission').value;
@@ -249,10 +278,9 @@ const myModule = (() => {
             console.log(res);
 
             res.photos.forEach(p => {
-                imgList.push(new classesModule.Image(p.img_src, dateInp, p.id, mission, cam));
+                imgList.add(new classesModule.Image(p.img_src, dateInp, p.id, mission, cam, p.earth_date, p.sol));
             });
-            resList.push(res);
-            displayImagesInHTML();
+            imgList.generateHTML()
             addListeners();
         })
             .catch(function (err) {
@@ -266,33 +294,12 @@ const myModule = (() => {
         myModule.querySelect("#myForm").reset(); // reset the form
     }
 //----------------------------
-    publicData.querySelect = function (container) {// generic func
+    const querySelect = function (container) {// generic func
         return document.querySelector(container);
     }
 //------------------------------------
-    publicData.setAttr = function (container, qualName, val) {// generic func
+    const setAttr = function (container, qualName, val) {// generic func
         myModule.querySelect(container).setAttribute(qualName, val);
-    }
-//--------------------------------------
-    const displayImagesInHTML = function () { // display list of tasks to the DOM
-        myModule.querySelect('#loading').style.display = "none";
-        let col1 = myModule.querySelect("#imagesOutput1");
-        let col2 = myModule.querySelect("#imagesOutput2");
-        let col3 = myModule.querySelect("#imagesOutput3");
-        col1.innerHTML = col2.innerHTML = col3.innerHTML = ''; // clear divs
-
-        imgList.forEach(img => {
-            if (imgList.indexOf(img) % 3 === 0)
-                appendCardToHtml(col1, img);
-            else if (imgList.indexOf(img) % 3 === 1)
-                appendCardToHtml(col2, img);
-            else if (imgList.indexOf(img) % 3 === 2)
-                appendCardToHtml(col3, img);
-        });
-    }
-    //----------------------------------
-    const appendCardToHtml = (where, element) => {
-        where.insertAdjacentHTML('beforeend', element.createDiv()); // where.appendChild(element.createDiv());
     }
     //--------------------------------------
     const addListeners = function () {
@@ -344,36 +351,36 @@ const myModule = (() => {
             return;
         }
 
-        resList.forEach(el => {
-            el.photos.forEach(p => {
-                if (id === p.id.toString()) createLi(p, id);
-            })
-        });
+        imgList.foreach(img => {
+            if (id === img.id.toString())
+                createLi(img, id);
+        })
     }
     //-----------------------------------
-    const createLi = function (p, id) {
+    const createLi = function (img, id) {
         let li = document.createElement('li');
         li.id = id;
-        li.appendChild(createLink(p, id));
-        li.innerHTML += "Earth date: " + p.earth_date + ', Sol: ' + p.sol + ', Camera: ' + p.camera.name;
+        li.appendChild(createLink(img, id));
+        li.innerHTML += "Earth date: " + img.earth_date + ', Sol: ' + img.sol + ', Camera: ' + img.camera;
         myModule.querySelect('#infos').appendChild(li);
     }
     //---------------------------
-    const createLink = function (p, id) {
+    const createLink = function (img, id) {
         let a = document.createElement('a');
         a.setAttribute('id', id);
-        a.setAttribute('href', p.img_src);
+        a.setAttribute('href', img.image_src);
         a.setAttribute('target', "_blank")
         a.innerHTML = "Image of: " + id + "<br>";
         return a;
     }
     //-------------------------------------
     //-------------------------------------
-    publicData.slideShow = function () {
+    const slideShow = function () {
         let carousel = myModule.querySelect('#innerCarousel');
         let indicator = myModule.querySelect('#indicator');
         carousel.innerHTML = indicator.innerHTML = '';
-        imgList.forEach(img => {
+
+        imgList.foreach(img => {
             //  carousel.insertAdjacentHTML('beforeend', createImageCarousel(img.image_src, img.camera, img.date, imgList.indexOf(img)));
             carousel.appendChild(createImageCarousel(img.image_src, img.camera, img.date, imgList.indexOf(img)));
             indicator.appendChild(createBtn(img));
@@ -431,53 +438,12 @@ const myModule = (() => {
 
     }
 
-
-    /*  return `
-         <div class=${nameClass}>
-            <img src=${img_src} class="d-block w-100" alt="...">
-               <div class="carousel-caption d-none d-md-block">
-                         <h5>${cameraName}</h5>
-                         <p>${dateMission}</p>
-                         <a href=${img_src} target="_blank">
-                             <button class="btn btn-primary ml-2 mr-2">Full size</button>
-                          </a>
-               </div>
-         </div>`*/
-
-    /*   let div = document.createElement('div');
-       index === 0 ? div.setAttribute('class', 'carousel-item active')
-           : div.setAttribute('class', 'carousel-item');
-
-       let img = document.createElement('img');
-       img.setAttribute('src', img_src);
-       img.setAttribute('class', 'd-block w-100');
-       div.appendChild(img);
-
-       let divCap = document.createElement('div');
-       divCap.setAttribute('class', "carousel-caption d-none d-md-block")
-       div.appendChild(divCap);
-
-       let camName = document.createElement('h5');
-       camName.innerHTML = cameraName;
-       divCap.appendChild(camName);
-
-       let date = document.createElement('p');
-       date.innerHTML = dateMission;
-       divCap.appendChild(date);
-
-       let a = document.createElement('a');
-       a.setAttribute('href', img_src);
-       a.setAttribute('target', "_blank")
-       appendNode(divCap, a, '', '');
-
-       let btn = createNode('button');
-       appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
-
-       return div;
-   }*/
-
-
-    return publicData;
+    return {
+        getData: getData,
+        querySelect: querySelect,
+        setAttr: setAttr,
+        slideShow: slideShow
+    }
 })();
 
 
