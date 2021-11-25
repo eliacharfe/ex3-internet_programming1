@@ -4,21 +4,21 @@ var LANDING_DATE_CURIOSITY, MAX_DATE_CURIOSITY, MAX_SOL_CURIOSITY,
     LANDING_DATE_SPIRIT, MAX_DATE_SPIRIT, MAX_SOL_SPIRIT;
 
 document.addEventListener('DOMContentLoaded', function () {
-    myModul.querySelect("#searchBtn").addEventListener("click", myModul.getData);
-    myModul.querySelect('#clearBtn').addEventListener('click', function () {
-        myModul.querySelect("#myForm").reset();
+    myModule.querySelect("#searchBtn").addEventListener("click", myModule.getData);
+    myModule.querySelect('#clearBtn').addEventListener('click', function () {
+        myModule.querySelect("#myForm").reset();
     });
-    myModul.querySelect('#mission').addEventListener('click', function () {
-        myModul.setAttr('#date', 'class', 'form-control');
-        myModul.setAttr('#incorrectDateInp', "class", "d-none");
+    myModule.querySelect('#mission').addEventListener('click', function () {
+        myModule.setAttr('#date', 'class', 'form-control');
+        myModule.setAttr('#incorrectDateInp', "class", "d-none");
     });
-    myModul.querySelect('#camera').addEventListener('click', function () {
-        myModul.setAttr('#date', 'class', 'form-control');
-        myModul.setAttr('#incorrectDateInp', "class", "d-none");
+    myModule.querySelect('#camera').addEventListener('click', function () {
+        myModule.setAttr('#date', 'class', 'form-control');
+        myModule.setAttr('#incorrectDateInp', "class", "d-none");
     });
-    myModul.querySelect('#slideShow').addEventListener('click', myModul.slideShow);
-    myModul.querySelect('#stopSlideShow').addEventListener('click', function () {
-        myModul.querySelect('#innerCarousel').innerHTML = '';
+    myModule.querySelect('#slideShow').addEventListener('click', myModule.slideShow);
+    myModule.querySelect('#stopSlideShow').addEventListener('click', function () {
+        myModule.querySelect('#innerCarousel').innerHTML = '';
     });
 
 }, false);
@@ -47,7 +47,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${API
     MAX_DATE_CURIOSITY = res.photo_manifest.max_date;
     MAX_SOL_CURIOSITY = res.photo_manifest.max_sol;
 }).catch(function () {
-    myModul.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
 });
 //------------------------------------
 fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${APIKEY}`)
@@ -57,7 +57,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${A
     MAX_DATE_OPPORTUNITY = res.photo_manifest.max_date;
     MAX_SOL_OPPORTUNITY = res.photo_manifest.max_sol;
 }).catch(function () {
-    myModul.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
 });
 //------------------------------------
 fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY}`)
@@ -67,7 +67,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY
     MAX_DATE_SPIRIT = res.photo_manifest.max_date;
     MAX_SOL_SPIRIT = res.photo_manifest.max_sol;
 }).catch(function () {
-    myModul.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
 });
 
 /*
@@ -76,24 +76,25 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY
 */
 
 // Validation Modul /////////////////////
-const validationModul = (() => {
+const validationModule = (() => {
     const publicDataValidation = {}
 
     publicDataValidation.correctInput = function (dateInp, mission, cam) {
         // check inputs and return true if all is correct inputs, else will show user what problem he have and return false
         if (!validDate(dateInp)) {
-            myModul.querySelect("#date").value = '';
-            myModul.setAttr('#date', 'class', 'form-control is-invalid');
-            return error('Please enter a valid format of date\n', "#incorrectDateInp");
+            // myModule.querySelect("#date").value = '';
+            return error('Please enter a valid format of date\n', "#incorrectDateInp", '#date', 'form-control is-invalid');
         }
-        if (mission === "Choose a mission") {
-            myModul.setAttr('#mission', 'class', 'form-select is-invalid');
-            return error('No such mission, please select a mission\n', '#incorrectMissionInp');
+        if (!validationModule.isExistDate(dateInp)) {
+            // myModule.querySelect("#date").value = '';
+            return error("This date does not exist", "#incorrectDateInp", '#date', 'form-control is-invalid');
         }
-        if (cam === "Choose a camera") {
-            myModul.setAttr('#camera', 'class', 'form-select is-invalid');
-            return error('No such camera, please select a camera from the options\n', '#incorrectCamInp');
-        }
+
+        if (mission === "Choose a mission")
+            return error('No such mission, please select a mission\n', '#incorrectMissionInp', '#mission', 'form-select is-invalid');
+
+        if (cam === "Choose a camera")
+            return error('No such camera, please select a camera from the options\n', '#incorrectCamInp', '#camera', 'form-select is-invalid');
 
         let landingDate, maxDate, maxSol;
         if (mission === "Curiosity") {
@@ -120,20 +121,13 @@ const validationModul = (() => {
     }
 //---------------------------------
     const valid = function (landingDate, maxDate, maxSol, dateInp) {
-        if ((validationModul.isEarthDate(dateInp) && (dateInp < landingDate))
-            || (validationModul.isEarthDate(dateInp) && (dateInp > maxDate))
-            || (validationModul.isSolDate(dateInp) && (dateInp > maxSol))) {
-            if (validationModul.isEarthDate(dateInp) && (dateInp < landingDate))
-                error(`The mission you've selected required a date after ${landingDate}`, '#incorrectDateInp');
-            else if (validationModul.isEarthDate(dateInp) && (dateInp > maxDate))
-                error(`The mission you've selected required a date before max date: ${maxDate}`, '#incorrectDateInp');
-            else if (validationModul.isSolDate(dateInp) && dateInp > maxSol)
-                error(`The mission you've selected required a date before max sol: ${maxSol}`, '#incorrectDateInp');
-
-            myModul.setAttr('#date', 'class', 'form-select is-invalid');
-            myModul.querySelect("#date").value = '';
-            return false;
-        }
+        if (validationModule.isEarthDate(dateInp) && (dateInp < landingDate))
+            return error(`The mission you've selected required a date after ${landingDate}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
+        else if (validationModule.isEarthDate(dateInp) && (dateInp > maxDate))
+            return error(`The mission you've selected required a date before max date: ${maxDate}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
+        else if (validationModule.isSolDate(dateInp) && dateInp > maxSol)
+            return error(`The mission you've selected required a date before max sol: ${maxSol}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
+        
         return true;
     }
 //----------------------------------
@@ -146,30 +140,34 @@ const validationModul = (() => {
     }
 //---------------------------------
     const validDate = function (date) {
-        return validationModul.isEarthDate(date) || validationModul.isSolDate(date);
+        return validationModule.isEarthDate(date) || validationModule.isSolDate(date);
     }
 //--------------------------------------
-    const error = function (str, incorrectInp) {
-        myModul.querySelect(incorrectInp).innerHTML = str;
-        myModul.setAttr(incorrectInp, "class", "alert alert-danger");
+    const error = function (str, incorrectInp, formInp, what) {
+        myModule.querySelect(incorrectInp).innerHTML = str;
+        myModule.setAttr(incorrectInp, "class", "alert alert-danger");
+        myModule.setAttr(formInp, 'class', what);
+        myModule.querySelect(formInp).value = '';
         return false;
     }
     //----------------------
     const errorCamera = function (mission, cam) {
-        error(`${mission} has no ${cam} camera`, '#incorrectCamInp');
-        myModul.setAttr('#camera', 'class', 'form-select is-invalid');
-        myModul.querySelect("#camera").selectedIndex = 0;
-        return false;
+        myModule.setAttr('#camera', 'class', 'form-select is-invalid');
+        myModule.querySelect("#camera").selectedIndex = 0;
+        return error(`${mission} has no ${cam} camera`, '#incorrectCamInp');
+    }
+    //---------------------------------
+    publicDataValidation.isExistDate = function (date) {
+        let d = new Date(date);
+        return d instanceof Date && !isNaN(d.getTime());
     }
 
     return publicDataValidation;
 })();
 //----------------------------//////////////////////////
-
 //------------------------------------
-const classesModul = (() => {
-
-    const publicData = {}
+const classesModule = (() => {
+    const publicData = {};
 
     publicData.Image = class Image {
         constructor(image_src, date, id, mission, camera) {
@@ -217,54 +215,55 @@ const classesModul = (() => {
     return publicData;
 })();
 
-const myModul = (() => {
-
+const myModule = (() => {
     let publicData = {}
     let imgList = []
     let resList = []
 
-    publicData.getData = async function () {
+    publicData.getData = function () {
         clearForm();
-        let dateInp = myModul.querySelect("#date").value.trim();
-        const mission = myModul.querySelect('#mission').value;
-        const cam = myModul.querySelect('#camera').value;
+        let dateInp = myModule.querySelect("#date").value.trim();
+        const mission = myModule.querySelect('#mission').value;
+        const cam = myModule.querySelect('#camera').value;
 
         let url;
-        if (validationModul.isEarthDate(dateInp)) {
+        if (validationModule.isEarthDate(dateInp)) {
             const d = new Date(dateInp);
-            dateInp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+            dateInp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2)
+                + '-' + ('0' + d.getDate()).slice(-2);
             url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&camera=${cam}&api_key=${APIKEY}`
-        } else if (validationModul.isSolDate(dateInp))
+        } else if (validationModule.isSolDate(dateInp))
             url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`
 
-        if (!validationModul.correctInput(dateInp, mission, cam))
+        if (!validationModule.correctInput(dateInp, mission, cam))
             return;
 
-        myModul.querySelect('#loading').style.display = "block";
-        myModul.querySelect("#loading").innerHTML = "<img src=https://64.media.tumblr.com/ec18887811b3dea8c69711c842de6bb9/tumblr_pabv7lGY7r1qza1qzo1_500.gifv  alt='...' >";
-        myModul.setAttr('#date', 'class', 'form-control');
-        myModul.setAttr('#mission', 'class', 'form-select');
-        myModul.setAttr('#camera', 'class', 'form-select');
+        myModule.querySelect('#loading').style.display = "block";
+        myModule.querySelect("#loading").innerHTML = "<img src=https://64.media.tumblr.com/ec18887811b3dea8c69711c842de6bb9/tumblr_pabv7lGY7r1qza1qzo1_500.gifv  alt='...' >";
+        myModule.setAttr('#date', 'class', 'form-control');
+        myModule.setAttr('#mission', 'class', 'form-select');
+        myModule.setAttr('#camera', 'class', 'form-select');
 
         fetch(url)
             .then(status).then(json).then(function (res) {
             console.log(res);
 
             res.photos.forEach(p => {
-                imgList.push(new classesModul.Image(p.img_src, dateInp, p.id, mission, cam));
+                imgList.push(new classesModule.Image(p.img_src, dateInp, p.id, mission, cam));
             });
             resList.push(res);
-            displayImages();
+            displayImagesInHTML();
+            addListeners();
         })
             .catch(function (err) {
                 console.log("catch: " + err);
-                myModul.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
+                myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
             });
 
-        myModul.setAttr('#incorrectDateInp', "class", "d-none");
-        myModul.setAttr('#incorrectMissionInp', "class", "d-none");
-        myModul.setAttr('#incorrectCamInp', "class", "d-none");
-        myModul.querySelect("#myForm").reset(); // reset the form
+        myModule.setAttr('#incorrectDateInp', "class", "d-none");
+        myModule.setAttr('#incorrectMissionInp', "class", "d-none");
+        myModule.setAttr('#incorrectCamInp', "class", "d-none");
+        myModule.querySelect("#myForm").reset(); // reset the form
     }
 //----------------------------
     publicData.querySelect = function (container) {// generic func
@@ -272,14 +271,14 @@ const myModul = (() => {
     }
 //------------------------------------
     publicData.setAttr = function (container, qualName, val) {// generic func
-        myModul.querySelect(container).setAttribute(qualName, val);
+        myModule.querySelect(container).setAttribute(qualName, val);
     }
 //--------------------------------------
-    const displayImages = function () { // display list of tasks to the DOM
-        myModul.querySelect('#loading').style.display = "none";
-        let col1 = myModul.querySelect("#imagesOutput1");
-        let col2 = myModul.querySelect("#imagesOutput2");
-        let col3 = myModul.querySelect("#imagesOutput3");
+    const displayImagesInHTML = function () { // display list of tasks to the DOM
+        myModule.querySelect('#loading').style.display = "none";
+        let col1 = myModule.querySelect("#imagesOutput1");
+        let col2 = myModule.querySelect("#imagesOutput2");
+        let col3 = myModule.querySelect("#imagesOutput3");
         col1.innerHTML = col2.innerHTML = col3.innerHTML = ''; // clear divs
 
         imgList.forEach(img => {
@@ -294,30 +293,28 @@ const myModul = (() => {
     //----------------------------------
     const appendCardToHtml = (where, element) => {
         where.insertAdjacentHTML('beforeend', element.createDiv()); // where.appendChild(element.createDiv());
-        let bs = document.getElementsByClassName("btn btn-info ml-2 mr-2");
-        bs[bs.length - 1].addEventListener('click', saveImageToList);
-        //   attachListeners()
     }
-
-    //-------------------------------------------
-    /*   function attachListeners() {
-           for (const b of document.getElementsByClassName("btn btn-info ml-2 mr-2"))
-               b.addEventListener('click', buttonsSaveHandle);
-       }*/
+    //--------------------------------------
+    const addListeners = function () {
+        let bs = document.getElementsByClassName("btn btn-info ml-2 mr-2");
+        // bs[bs.length - 1].addEventListener('click', saveImageToList);
+        for (let b of bs) {
+            b.addEventListener('click', saveImageToList);
+        }
+    }
     //--------------------------------
-    //--------------------------------
-    const  createNode = function (node) {// generic func
+    const createNode = function (node) {// generic func
         return document.createElement(node);
     }
-
-    const  appendNode = function (parent, child, nameClass, inner) { // generic func
+    //-----------------
+    const appendNode = function (parent, child, nameClass, inner) { // generic func
         child.className = nameClass;
         child.innerHTML = inner;
         parent.appendChild(child);
     }
 //------------------------------------------------
     const clear = function (container) {
-        myModul.querySelect(container).value = '';
+        myModule.querySelect(container).value = '';
     }
 //------------------------------
     const clearForm = function () {
@@ -325,21 +322,20 @@ const myModul = (() => {
         clear('#incorrectDateInp');
         clear('#incorrectMissionInp');
         clear('#incorrectCamInp');
-        myModul.setAttr('#incorrectDateInp', "class", "d-none");
-        myModul.setAttr('#incorrectMissionInp', "class", "d-none");
-        myModul.setAttr('#incorrectCamInp', "class", "d-none");
-        myModul.setAttr('#date', 'class', 'form-control');
-        myModul.setAttr('#mission', 'class', 'form-select');
-        myModul.setAttr('#camera', 'class', 'form-select');
+        myModule.setAttr('#incorrectDateInp', "class", "d-none");
+        myModule.setAttr('#incorrectMissionInp', "class", "d-none");
+        myModule.setAttr('#incorrectCamInp', "class", "d-none");
+        myModule.setAttr('#date', 'class', 'form-control');
+        myModule.setAttr('#mission', 'class', 'form-select');
+        myModule.setAttr('#camera', 'class', 'form-select');
     }
 //---------------------------------------
     const saveImageToList = function (btn) {
         const id = btn.target.parentElement.getElementsByTagName('p')[1].innerHTML;
         let exist = false;
-        const savedListImg = myModul.querySelect('#infos').querySelectorAll('li');
+        const savedListImg = myModule.querySelect('#infos').querySelectorAll('li');
         savedListImg.forEach(li => {
-            if (li.id === id)
-                exist = true;
+            if (li.id === id) exist = true;
         });
         if (exist) {
             btn.target.setAttribute('data-bs-toggle', 'modal');
@@ -350,8 +346,7 @@ const myModul = (() => {
 
         resList.forEach(el => {
             el.photos.forEach(p => {
-                if (id === p.id.toString())
-                    createLi(p, id);
+                if (id === p.id.toString()) createLi(p, id);
             })
         });
     }
@@ -361,9 +356,9 @@ const myModul = (() => {
         li.id = id;
         li.appendChild(createLink(p, id));
         li.innerHTML += "Earth date: " + p.earth_date + ', Sol: ' + p.sol + ', Camera: ' + p.camera.name;
-        myModul.querySelect('#infos').appendChild(li);
+        myModule.querySelect('#infos').appendChild(li);
     }
-//---------------------------
+    //---------------------------
     const createLink = function (p, id) {
         let a = document.createElement('a');
         a.setAttribute('id', id);
@@ -373,19 +368,20 @@ const myModul = (() => {
         return a;
     }
     //-------------------------------------
-
+    //-------------------------------------
     publicData.slideShow = function () {
-        let carousel = myModul.querySelect('#innerCarousel');
-        let indicator = myModul.querySelect('#indicator');
+        let carousel = myModule.querySelect('#innerCarousel');
+        let indicator = myModule.querySelect('#indicator');
         carousel.innerHTML = indicator.innerHTML = '';
         imgList.forEach(img => {
-          //  carousel.insertAdjacentHTML('beforeend', createImageCarousel(img.image_src, img.camera, img.date, imgList.indexOf(img)));
+            //  carousel.insertAdjacentHTML('beforeend', createImageCarousel(img.image_src, img.camera, img.date, imgList.indexOf(img)));
             carousel.appendChild(createImageCarousel(img.image_src, img.camera, img.date, imgList.indexOf(img)));
             indicator.appendChild(createBtn(img));
         });
     }
+
 //------------------------------------
-    function createBtn (img){
+    function createBtn(img) {
         let btn = createNode('button');
         btn.setAttribute('data-bs-target', '#carousel');
         if (imgList.indexOf(img) === 0) {
@@ -397,59 +393,14 @@ const myModul = (() => {
         btn.setAttribute('aria-label', 'Slide' + imgList.indexOf(img).toString());
         return btn;
     }
+
 //---------------------------------------
-   const createImageCarousel = function (img_src, cameraName, dateMission, index) {
-       let nameClass;
-       (index === 0) ? nameClass = "carousel-item active" : nameClass = "carousel-item";
-      // myModul.querySelect('#infos').innerHTML += nameClass +"<br>";
-       let div = document.createElement('div');
-       div.setAttribute('class', `${nameClass}`);
-
-       let img = document.createElement('img');
-       img.setAttribute('src', img_src);
-       img.setAttribute('class', 'd-block w-100');
-       div.appendChild(img);
-
-       let divCap = document.createElement('div');
-       divCap.setAttribute('class', "carousel-caption d-none d-md-block")
-       div.appendChild(divCap);
-
-       let camName = document.createElement('h5');
-       camName.innerHTML = cameraName;
-       divCap.appendChild(camName);
-
-       let date = document.createElement('p');
-       date.innerHTML = dateMission;
-       divCap.appendChild(date);
-
-       let a = document.createElement('a');
-       a.setAttribute('href', img_src);
-       a.setAttribute('target', "_blank")
-       appendNode(divCap, a, '', '');
-
-       let btn = createNode('button');
-       appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
-
-       return div;
-
-   }
-
-
-    /*  return `
-         <div class=${nameClass}>
-            <img src=${img_src} class="d-block w-100" alt="...">
-               <div class="carousel-caption d-none d-md-block">
-                         <h5>${cameraName}</h5>
-                         <p>${dateMission}</p>
-                         <a href=${img_src} target="_blank">
-                             <button class="btn btn-primary ml-2 mr-2">Full size</button>
-                          </a>
-               </div>
-         </div>`*/
-
-     /*   let div = document.createElement('div');
-        index === 0 ? div.setAttribute('class', 'carousel-item active')
-            : div.setAttribute('class', 'carousel-item');
+    const createImageCarousel = function (img_src, cameraName, dateMission, index) {
+        let nameClass;
+        (index === 0) ? nameClass = "carousel-item active" : nameClass = "carousel-item";
+        // myModule.querySelect('#infos').innerHTML += nameClass +"<br>";
+        let div = document.createElement('div');
+        div.setAttribute('class', `${nameClass}`);
 
         let img = document.createElement('img');
         img.setAttribute('src', img_src);
@@ -477,17 +428,57 @@ const myModul = (() => {
         appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
 
         return div;
-    }*/
+
+    }
+
+
+    /*  return `
+         <div class=${nameClass}>
+            <img src=${img_src} class="d-block w-100" alt="...">
+               <div class="carousel-caption d-none d-md-block">
+                         <h5>${cameraName}</h5>
+                         <p>${dateMission}</p>
+                         <a href=${img_src} target="_blank">
+                             <button class="btn btn-primary ml-2 mr-2">Full size</button>
+                          </a>
+               </div>
+         </div>`*/
+
+    /*   let div = document.createElement('div');
+       index === 0 ? div.setAttribute('class', 'carousel-item active')
+           : div.setAttribute('class', 'carousel-item');
+
+       let img = document.createElement('img');
+       img.setAttribute('src', img_src);
+       img.setAttribute('class', 'd-block w-100');
+       div.appendChild(img);
+
+       let divCap = document.createElement('div');
+       divCap.setAttribute('class', "carousel-caption d-none d-md-block")
+       div.appendChild(divCap);
+
+       let camName = document.createElement('h5');
+       camName.innerHTML = cameraName;
+       divCap.appendChild(camName);
+
+       let date = document.createElement('p');
+       date.innerHTML = dateMission;
+       divCap.appendChild(date);
+
+       let a = document.createElement('a');
+       a.setAttribute('href', img_src);
+       a.setAttribute('target', "_blank")
+       appendNode(divCap, a, '', '');
+
+       let btn = createNode('button');
+       appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
+
+       return div;
+   }*/
 
 
     return publicData;
 })();
-
-
-
-
-
-
 
 
 ////////////////////////////////////
@@ -498,81 +489,65 @@ const carouselModul = (() => {
 
 //-------------------------------------
  /!*   publicDataCarousel.slideShow = function () {
-        let carousel = myModul.querySelect('#innerCarousel');
-        let ind = myModul.querySelect('#indicator');
+        let carousel = myModule.querySelect('#innerCarousel');
+        let ind = myModule.querySelect('#indicator');
         carousel.innerHTML = ind.innerHTML = '';
-        myModul.getList().forEach(img => {
-            carousel.appendChild(createImageCarousel(img.image, img.camera, img.date, myModul.getList().indexOf(img)));
+        myModule.getList().forEach(img => {
+            carousel.appendChild(createImageCarousel(img.image, img.camera, img.date, myModule.getList().indexOf(img)));
             ind.appendChild(createBtn(img));
         });
     }
 
 //------------------------------------
     function createBtn(img) {
-        let btn = myModul.createNode('button');
+        let btn = myModule.createNode('button');
         btn.setAttribute('data-bs-target', '#carousel');
-        if (myModul.getList().indexOf(img) === 0) {
+        if (myModule.getList().indexOf(img) === 0) {
             btn.setAttribute('class', 'active');
             btn.setAttribute('aria-current', 'true');
         }
         btn.setAttribute('type', 'button');
-        btn.setAttribute('data-bs-slide-to', myModul.getList().indexOf(img).toString());
-        btn.setAttribute('aria-label', 'Slide' + myModul.getList().indexOf(img).toString());
+        btn.setAttribute('data-bs-slide-to', myModule.getList().indexOf(img).toString());
+        btn.setAttribute('aria-label', 'Slide' + myModule.getList().indexOf(img).toString());
         return btn;
     }
 
 //---------------------------------------
     const createImageCarousel = function (img_src, cameraName, dateMission, index) {
-        let div = myModul.createNode('div');
+        let div = myModule.createNode('div');
         index === 0 ? div.setAttribute('class', 'carousel-item active')
             : div.setAttribute('class', 'carousel-item');
 
-        let img = myModul.createNode('img');
+        let img = myModule.createNode('img');
         img.setAttribute('src', img_src);
         img.setAttribute('class', 'd-block w-100');
         div.appendChild(img);
 
-        let divCap = myModul.createNode('div');
+        let divCap = myModule.createNode('div');
         divCap.setAttribute('class', "carousel-caption d-none d-md-block")
         div.appendChild(divCap);
 
-        let camName = myModul.createNode('h5');
+        let camName = myModule.createNode('h5');
         camName.innerHTML = cameraName;
         divCap.appendChild(camName);
 
-        let date = myModul.createNode('p');
+        let date = myModule.createNode('p');
         date.innerHTML = dateMission;
         divCap.appendChild(date);
 
-        let a = myModul.createNode('a');
+        let a = myModule.createNode('a');
         a.setAttribute('href', img_src);
         a.setAttribute('target', "_blank")
-        myModul.appendNode(divCap, a, '', '');
+        myModule.appendNode(divCap, a, '', '');
 
-        let btn = myModul.createNode('button');
-        myModul.appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
+        let btn = myModule.createNode('button');
+        myModule.appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
 
         return div;
     }*!/
     return publicDataCarousel;
 })();
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* } else {
@@ -679,7 +654,6 @@ const getCurrDate = function () {
    appendNode(a, btnFullSize, 'btn btn-primary ml-2 mr-2', "Full size");
 
    return myDiv;*/
-
 
 
 /*
