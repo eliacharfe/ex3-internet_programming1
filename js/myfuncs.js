@@ -1,4 +1,5 @@
 const APIKEY = 'UsppJXiLnEkRVSJzaCP92eXcCZsZAnYAyM8AomWZ';
+const LOAD_IMG_SRC = "<img src=https://64.media.tumblr.com/ec18887811b3dea8c69711c842de6bb9/tumblr_pabv7lGY7r1qza1qzo1_500.gifv  alt='...' >";
 var LANDING_DATE_CURIOSITY, MAX_DATE_CURIOSITY, MAX_SOL_CURIOSITY,
     LANDING_DATE_OPPORTUNITY, MAX_DATE_OPPORTUNITY, MAX_SOL_OPPORTUNITY,
     LANDING_DATE_SPIRIT, MAX_DATE_SPIRIT, MAX_SOL_SPIRIT;
@@ -254,6 +255,7 @@ const myModule = (() => {
         let dateInp = myModule.querySelect("#date").value.trim();
         const mission = myModule.querySelect('#mission').value;
         const cam = myModule.querySelect('#camera').value;
+        let loadImg = myModule.querySelect('#loading');
 
         let url;
         if (validationModule.isEarthDate(dateInp)) {
@@ -267,11 +269,9 @@ const myModule = (() => {
         if (!validationModule.correctInput(dateInp, mission, cam))
             return;
 
-        myModule.querySelect('#loading').style.display = "block";
-        myModule.querySelect("#loading").innerHTML = "<img src=https://64.media.tumblr.com/ec18887811b3dea8c69711c842de6bb9/tumblr_pabv7lGY7r1qza1qzo1_500.gifv  alt='...' >";
-        myModule.setAttr('#date', 'class', 'form-control');
-        myModule.setAttr('#mission', 'class', 'form-select');
-        myModule.setAttr('#camera', 'class', 'form-select');
+        resetInputs();
+        loadImg.style.display = "block";
+        loadImg.innerHTML = LOAD_IMG_SRC;
 
         fetch(url)
             .then(status).then(json).then(function (res) {
@@ -288,9 +288,7 @@ const myModule = (() => {
                 myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
             });
 
-        myModule.setAttr('#incorrectDateInp', "class", "d-none");
-        myModule.setAttr('#incorrectMissionInp', "class", "d-none");
-        myModule.setAttr('#incorrectCamInp', "class", "d-none");
+        resetErrors();
         myModule.querySelect("#myForm").reset(); // reset the form
     }
 //----------------------------
@@ -329,12 +327,20 @@ const myModule = (() => {
         clear('#incorrectDateInp');
         clear('#incorrectMissionInp');
         clear('#incorrectCamInp');
-        myModule.setAttr('#incorrectDateInp', "class", "d-none");
-        myModule.setAttr('#incorrectMissionInp', "class", "d-none");
-        myModule.setAttr('#incorrectCamInp', "class", "d-none");
+        resetInputs();
+        resetErrors()
+    }
+    //------------------------------------
+    const resetInputs = function (){
         myModule.setAttr('#date', 'class', 'form-control');
         myModule.setAttr('#mission', 'class', 'form-select');
         myModule.setAttr('#camera', 'class', 'form-select');
+    }
+    //---------------------
+    const resetErrors = function (){
+        myModule.setAttr('#incorrectDateInp', "class", "d-none");
+        myModule.setAttr('#incorrectMissionInp', "class", "d-none");
+        myModule.setAttr('#incorrectCamInp', "class", "d-none");
     }
 //---------------------------------------
     const saveImageToList = function (btn) {
