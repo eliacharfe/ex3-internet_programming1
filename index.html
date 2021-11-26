@@ -46,12 +46,12 @@
             <div id="mainDiv">
 
                 <form class="mb-3" id="myForm" method="post" autocomplete="on">
-                    <div class="form-group mb-2">
+                    <div class="mb-2"><!--form-group-->
                         <label for="date" class="form-label">Date (YYYY-MM-DD) or Sol</label>
                         <input type="text" class="form-control" id="date" placeholder="Enter a date"
                                autocomplete="on" required>
+                        <div class="text-danger errormessage" id="incorrectDateInp"></div>
                     </div>
-                    <div id="incorrectDateInp"></div>
 
                     <div class="mb-2">
                         <label for="mission">Select Mission</label>
@@ -61,8 +61,9 @@
                             <option value="Opportunity">Opportunity</option>
                             <option value="Spirit">Spirit</option>
                         </select>
+                        <div class="text-danger errormessage" id="incorrectMissionInp"></div>
                     </div>
-                    <div id="incorrectMissionInp"></div>
+
 
                     <div class="mb-3">
                         <label for="camera">Select Camera</label>
@@ -78,8 +79,9 @@
                             <option value="PANCAM">PANCAM</option>
                             <option value="MINITES">MINITES</option>
                         </select>
+                        <div class="text-danger errormessage" id="incorrectCamInp"></div>
                     </div>
-                    <div id="incorrectCamInp"></div>
+
                 </form>
                 <button type="button" class="btn btn-outline-info mb-3" data-toggle="tooltip" data-bs-toggle="popover"
                         title="Popover title"
