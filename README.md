@@ -10,7 +10,7 @@ A started template for JS project
 <h1>Execution</h1>
 <p>
 The submission is a WebStorm project that can be run directly from the IDE. <br><br>
- The program is executing a connection to NASA API serever. The goal is to get mars <br>
+ The program is executing a connection to NASA API server. The goal is to get mars <br>
  photos according to user inputs which includes a date, a mission and a camera. <br>
  First it uses 3 fetches to get basic data about the 3 missions (landing date, max <br>
  earth date and max sol) and save those in variables. If the fetch is doesnt working <br>
