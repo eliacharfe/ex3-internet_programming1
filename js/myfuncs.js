@@ -28,43 +28,50 @@ function status(response) {
         return Promise.reject(new Error(response.statusText))
     }
 }
+
 //-------------------------------------------
 function json(response) {
     return response.json()
 }
-//---------------------------------
-(function() {
-fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${APIKEY}`)
-    .then(status).then(json).then(function (res) {
-    console.log(res);
-    LANDING_DATE_CURIOSITY = res.photo_manifest.landing_date;
-    MAX_DATE_CURIOSITY = res.photo_manifest.max_date;
-    MAX_SOL_CURIOSITY = res.photo_manifest.max_sol;
-}).catch(function () {
-    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
-});
-//------------------------------------
-fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${APIKEY}`)
-    .then(status).then(json).then(function (res) {
-    console.log(res);
-    LANDING_DATE_OPPORTUNITY = res.photo_manifest.landing_date;
-    MAX_DATE_OPPORTUNITY = res.photo_manifest.max_date;
-    MAX_SOL_OPPORTUNITY = res.photo_manifest.max_sol;
-}).catch(function () {
-    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
-});
-//------------------------------------
-fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY}`)
-    .then(status).then(json).then(function (res) {
-    console.log(res);
-    LANDING_DATE_SPIRIT = res.photo_manifest.landing_date;
-    MAX_DATE_SPIRIT = res.photo_manifest.max_date;
-    MAX_SOL_SPIRIT = res.photo_manifest.max_sol;
-}).catch(function () {
-    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
-});
-})();
 
+//---------------------------------
+(function () {
+    fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${APIKEY}`)
+        .then(status).then(json).then(function (res) {
+        console.log(res);
+        LANDING_DATE_CURIOSITY = res.photo_manifest.landing_date;
+        MAX_DATE_CURIOSITY = res.photo_manifest.max_date;
+        MAX_SOL_CURIOSITY = res.photo_manifest.max_sol;
+    }).catch(function () {
+        LANDING_DATE_CURIOSITY = "2012-08-06";
+        MAX_DATE_CURIOSITY = "2021-11-25";
+        MAX_SOL_CURIOSITY = 3302
+    });
+//------------------------------------
+    fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${APIKEY}`)
+        .then(status).then(json).then(function (res) {
+        console.log(res);
+        LANDING_DATE_OPPORTUNITY = res.photo_manifest.landing_date;
+        MAX_DATE_OPPORTUNITY = res.photo_manifest.max_date;
+        MAX_SOL_OPPORTUNITY = res.photo_manifest.max_sol;
+    }).catch(function () {
+        LANDING_DATE_OPPORTUNITY = "2004-01-25";
+        MAX_DATE_OPPORTUNITY = "2018-06-11";
+        MAX_SOL_OPPORTUNITY = 5111;
+    });
+//------------------------------------
+    fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY}`)
+        .then(status).then(json).then(function (res) {
+        console.log(res);
+        LANDING_DATE_SPIRIT = res.photo_manifest.landing_date;
+        MAX_DATE_SPIRIT = res.photo_manifest.max_date;
+        MAX_SOL_SPIRIT = res.photo_manifest.max_sol;
+    }).catch(function () {
+        LANDING_DATE_SPIRIT = "2004-01-04";
+        MAX_DATE_SPIRIT = "2010-03-21";
+        MAX_SOL_SPIRIT = 2208;
+    });
+})();
 
 // Validation Modul /////////////////////
 const validationModule = (() => {
@@ -97,7 +104,6 @@ const validationModule = (() => {
         }
         if (v2 && !validateInput(mission, validMissionDate))
             v = false;
-
         if (v3 && !validateInput(cam, isCameraExistToMission))
             v = false;
 
@@ -125,23 +131,23 @@ const validationModule = (() => {
             }
         }
 
-        return {isValid: true, message: ''}
+        return { isValid: true, message: ''}
     }
     //-------------------------------
     const setDateMissionCam = function (mission) {
-        if (mission === "Curiosity") {
+        if (isCuriosity(mission)) {
             return {
                 landingDate: LANDING_DATE_CURIOSITY,
                 maxDate: MAX_DATE_CURIOSITY,
                 maxSol: MAX_SOL_CURIOSITY
             }
-        } else if (mission === "Opportunity") {
+        } else if (isOpportunity(mission)) {
             return {
                 landingDate: LANDING_DATE_OPPORTUNITY,
                 maxDate: MAX_DATE_OPPORTUNITY,
                 maxSol: MAX_SOL_OPPORTUNITY,
             }
-        } else if (mission === "Spirit") {
+        } else if (isSpirit(mission)) {
             return {
                 landingDate: LANDING_DATE_SPIRIT,
                 maxDate: MAX_DATE_SPIRIT,
@@ -153,8 +159,8 @@ const validationModule = (() => {
     const isCameraExistToMission = function (cam) {
         let mission = myModule.querySelect('#mission').value;
 
-        if ((mission === "Curiosity" && (cam === "PANCAM" || cam === "MINITES"))
-            || ((mission === "Opportunity" || mission === "Spirit") && (cam === "MAST" || cam === "CHEMCAM" || cam === "MAHLI" || cam === "MARDI")))
+        if ((isCuriosity(mission) && (cam === "PANCAM" || cam === "MINITES"))
+            || ((isOpportunity(mission) || isSpirit(mission)) && (cam === "MAST" || cam === "CHEMCAM" || cam === "MAHLI" || cam === "MARDI")))
             return {
                 isValid: false,
                 message: `${mission} has no ${cam} camera`
@@ -198,6 +204,17 @@ const validationModule = (() => {
             message: 'Input is required here'
         }
     }
+    //-------------------------
+    const isCuriosity = function (mission){
+        return mission === "Curiosity";
+    }
+    const isOpportunity = function (mission){
+        return mission === "Opportunity";
+    }
+    const isSpirit = function (mission){
+        return mission === "Spirit";
+    }
+
 
     return {
         validForm: validForm,
@@ -302,6 +319,23 @@ const classesModule = (() => {
 const myModule = (() => {
     let imgList = new classesModule.ImagesList();
 
+    const getURL = function (dateInp, mission, cam) {
+        const roverURL = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?`;
+        const params = new URLSearchParams();
+        params.append('camera', `${cam}`);
+        params.append('api_key', `${APIKEY}`);
+
+        if (validationModule.isEarthDate(dateInp)) {
+            const d = new Date(dateInp); // making for example: 2018-4-6 ==> 2018-04-06
+            dateInp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+            params.append('earth_date', `${dateInp}`);
+            return roverURL + params.toString();
+        } else if (validationModule.isSolDate(dateInp)) {
+            params.append('sol', `${dateInp}`);
+            return roverURL + params.toString();
+        }
+    }
+    //---------------------------------
     const getData = async function () {
         let dateInp = myModule.querySelect("#date");
         let mission = myModule.querySelect('#mission');
@@ -310,22 +344,15 @@ const myModule = (() => {
 
         if (!validationModule.validForm(dateInp, mission, cam))
             return;
-
-        let url;
-        dateInp = dateInp.value.trim();
-        mission = mission.value;
-        cam = cam.value;
-        if (validationModule.isEarthDate(dateInp)) {
-            const d = new Date(dateInp);
-            dateInp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
-            url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&camera=${cam}&api_key=${APIKEY}`
-        } else if (validationModule.isSolDate(dateInp))
-            url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`
-
+        // if got here the inputs are correct
         loadingImg.style.display = "block";
         loadingImg.innerHTML = LOAD_IMG_SRC;
 
-        fetch(url)
+        dateInp = dateInp.value.trim();
+        mission = mission.value;
+        cam = cam.value;
+
+        fetch(getURL(dateInp, mission, cam))
             .then(status).then(json).then(function (res) {
             console.log(res);
 
@@ -383,7 +410,7 @@ const myModule = (() => {
         const id = btn.target.parentElement.getElementsByTagName('p')[0].innerHTML;
         let exist = false;
         const savedListImg = myModule.querySelect('#infos').querySelectorAll('li');
-        savedListImg.forEach(li => {
+        savedListImg.forEach(li => { // check if the image user want to save is already exist
             if (li.id === id) exist = true;
         });
         if (exist) {
@@ -395,7 +422,7 @@ const myModule = (() => {
 
         imgList.foreach(img => {
             if (id === img.id.toString())
-                createLi(img, id);
+                createLi(img, id); // create next li with the image details and a link to full screen image mode
         })
     }
     //-----------------------------------
@@ -428,7 +455,6 @@ const myModule = (() => {
             indicator.appendChild(createBtn(img));
         });
     }
-
     //------------------------------------
     function createBtn(img) {
         let btn = createNode('button');
@@ -442,7 +468,6 @@ const myModule = (() => {
         btn.setAttribute('aria-label', 'Slide' + imgList.indexOf(img).toString());
         return btn;
     }
-
     //---------------------------------------
     const createImageCarousel = function (img_src, cameraName, dateMission, index) {
         let nameClass;
@@ -491,3 +516,5 @@ const myModule = (() => {
 
 
 // bs[bs.length - 1].addEventListener('click', saveImageToList);
+
+// return `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&camera=${cam}&api_key=${APIKEY}`
