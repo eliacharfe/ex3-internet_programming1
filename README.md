@@ -16,7 +16,7 @@ The submission is a WebStorm project that can be run directly from the IDE. <br>
  earth date and max sol) and save those in variables. If the fetch is doesnt working <br>
  due to Server break down (404, 504 etc) will insert default data about the missions. <br>
  This program open an html page which has a form where the user to insert a valid date<br>
- that or Sol, a mission name and a camera name. Then when the user is submiiting the<br>
+ or Sol, a mission name and a camera name. Then when the user is submiiting the<br>
  form, do validation and inform the user what is wrong under the particular input field. <br>
  If all the inputs are correct then executes another fetch with the data to get the mars <br>
  photos and show them in 3 columns with details about each photo and with 2 buttons, 1 button<br>
