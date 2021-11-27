@@ -28,15 +28,12 @@ function status(response) {
         return Promise.reject(new Error(response.statusText))
     }
 }
-
 //-------------------------------------------
 function json(response) {
     return response.json()
 }
-
 //---------------------------------
-/*const inisializeModul = (() => {
-    let publicData = {}*/
+(function() {
 fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${APIKEY}`)
     .then(status).then(json).then(function (res) {
     console.log(res);
@@ -44,7 +41,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${API
     MAX_DATE_CURIOSITY = res.photo_manifest.max_date;
     MAX_SOL_CURIOSITY = res.photo_manifest.max_sol;
 }).catch(function () {
-    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
 });
 //------------------------------------
 fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${APIKEY}`)
@@ -54,7 +51,7 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Opportunity?api_key=${A
     MAX_DATE_OPPORTUNITY = res.photo_manifest.max_date;
     MAX_SOL_OPPORTUNITY = res.photo_manifest.max_sol;
 }).catch(function () {
-    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
 });
 //------------------------------------
 fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY}`)
@@ -64,13 +61,10 @@ fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Spirit?api_key=${APIKEY
     MAX_DATE_SPIRIT = res.photo_manifest.max_date;
     MAX_SOL_SPIRIT = res.photo_manifest.max_sol;
 }).catch(function () {
-    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to server...";
+    myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
 });
-
-/*
-    return publicData;
 })();
-*/
+
 
 // Validation Modul /////////////////////
 const validationModule = (() => {
@@ -83,8 +77,8 @@ const validationModule = (() => {
     }
     //--------------------------------------------------------
     const validForm = function (dateInp, mission, cam) {
-
         dateInp.value = dateInp.value.trim();
+
         let v1 = validateInput(dateInp, isNotEmpty);
         let v2 = validateInput(mission, isNotNullInput);
         let v3 = validateInput(cam, isNotNullInput);
@@ -212,9 +206,9 @@ const validationModule = (() => {
     }
 })();
 //----------------------------//////////////////////////
-//------------------------------------
+//  Classes Modul
 const classesModule = (() => {
-    const Image = class Image {
+    const Image = class Image { // single image class
         constructor(image_src, date, id, mission, camera, earth_date, sol) {
             this.image_src = image_src;
             this.date = date;
@@ -231,10 +225,11 @@ const classesModule = (() => {
                <div class="card  border border-5 rounded-3  mb-2" style="width: 18rem;">
                 <img src=${this.image_src} class="card-img-top" alt="...">
                  <div class="card-body">
-                    <p class="card-text">Date: ${this.date}</p>
                     <p class="card-text">${this.id}</p>
+                    <p class="card-text">Earth date: ${this.date}</p>
+                    <p class="card-text">Sol: ${this.sol}</p>
                     <p class="card-text">Camera: ${this.camera}</p>
-                    <p class="card-text">${this.mission}</p>
+                    <p class="card-text">Mission: ${this.mission}</p>
                     <button class="btn btn-info ml-2 mr-2">Save</button>
                     <a href=${this.image_src} target="_blank">
                        <button class="btn btn-primary ml-2 mr-2">Full size</button>
@@ -249,16 +244,19 @@ const classesModule = (() => {
             where.insertAdjacentHTML('beforeend', element.createDiv()); // where.appendChild(element.createDiv());
         }
     }
-
-    const ImagesList = class {
+    //-------------------
+    //---------------------
+    const ImagesList = class { // list of images class
         constructor() {
             this.list = [];
         }
 
+        //----------
         add(img) {
             this.list.push(img);
         }
 
+        //------------
         indexOf(i) {
             return this.list.indexOf(i);
         }
@@ -304,8 +302,7 @@ const classesModule = (() => {
 const myModule = (() => {
     let imgList = new classesModule.ImagesList();
 
-    const getData = function () {
-        //  clearForm();
+    const getData = async function () {
         let dateInp = myModule.querySelect("#date");
         let mission = myModule.querySelect('#mission');
         let cam = myModule.querySelect('#camera');
@@ -320,22 +317,17 @@ const myModule = (() => {
         cam = cam.value;
         if (validationModule.isEarthDate(dateInp)) {
             const d = new Date(dateInp);
-            dateInp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2)
-                + '-' + ('0' + d.getDate()).slice(-2);
+            dateInp = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
             url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&camera=${cam}&api_key=${APIKEY}`
         } else if (validationModule.isSolDate(dateInp))
             url = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?sol=${dateInp}&camera=${cam}&api_key=${APIKEY}`
 
-        // resetInputs();
         loadingImg.style.display = "block";
         loadingImg.innerHTML = LOAD_IMG_SRC;
 
         fetch(url)
             .then(status).then(json).then(function (res) {
             console.log(res);
-
-            /*     if (res.photos.length == 0)
-                     myModule.querySelect('#imagesOutput1').innerHTML = "No images found"*/
 
             res.photos.forEach(p => {
                 imgList.add(new classesModule.Image(p.img_src, dateInp, p.id, mission, cam, p.earth_date, p.sol));
@@ -348,7 +340,6 @@ const myModule = (() => {
                 myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
             });
 
-        //  resetErrors();
         imgList.empty();
         myModule.querySelect("#myForm").reset(); // reset the form
     }
@@ -363,10 +354,8 @@ const myModule = (() => {
     //--------------------------------------
     const addListeners = function () {
         let bs = document.getElementsByClassName("btn btn-info ml-2 mr-2");
-        // bs[bs.length - 1].addEventListener('click', saveImageToList);
-        for (let b of bs) {
+        for (let b of bs)
             b.addEventListener('click', saveImageToList);
-        }
     }
     //--------------------------------
     const createNode = function (node) {// generic func
@@ -391,7 +380,7 @@ const myModule = (() => {
     }
     //---------------------------------------
     const saveImageToList = function (btn) {
-        const id = btn.target.parentElement.getElementsByTagName('p')[1].innerHTML;
+        const id = btn.target.parentElement.getElementsByTagName('p')[0].innerHTML;
         let exist = false;
         const savedListImg = myModule.querySelect('#infos').querySelectorAll('li');
         savedListImg.forEach(li => {
@@ -440,7 +429,7 @@ const myModule = (() => {
         });
     }
 
-//------------------------------------
+    //------------------------------------
     function createBtn(img) {
         let btn = createNode('button');
         btn.setAttribute('data-bs-target', '#carousel');
@@ -454,32 +443,32 @@ const myModule = (() => {
         return btn;
     }
 
-//---------------------------------------
+    //---------------------------------------
     const createImageCarousel = function (img_src, cameraName, dateMission, index) {
         let nameClass;
         (index === 0) ? nameClass = "carousel-item active" : nameClass = "carousel-item";
-        // myModule.querySelect('#infos').innerHTML += nameClass +"<br>";
-        let div = document.createElement('div');
+
+        let div = createNode('div');
         div.setAttribute('class', `${nameClass}`);
 
-        let img = document.createElement('img');
+        let img = createNode('img');
         img.setAttribute('src', img_src);
         img.setAttribute('class', 'd-block w-100');
         div.appendChild(img);
 
-        let divCap = document.createElement('div');
+        let divCap = createNode('div');
         divCap.setAttribute('class', "carousel-caption d-none d-md-block")
         div.appendChild(divCap);
 
-        let camName = document.createElement('h5');
+        let camName = createNode('h5');
         camName.innerHTML = cameraName;
         divCap.appendChild(camName);
 
-        let date = document.createElement('p');
+        let date = createNode('p');
         date.innerHTML = dateMission;
         divCap.appendChild(date);
 
-        let a = document.createElement('a');
+        let a = createNode('a');
         a.setAttribute('href', img_src);
         a.setAttribute('target', "_blank")
         appendNode(divCap, a, '', '');
@@ -488,7 +477,6 @@ const myModule = (() => {
         appendNode(a, btn, 'btn btn-primary ml-2 mr-2', 'Full size');
 
         return div;
-
     }
 
     return {
@@ -502,79 +490,4 @@ const myModule = (() => {
 })();
 
 
-/*    myModule.querySelect('#mission').addEventListener('click', function () {
-        myModule.setAttr('#date', 'class', 'form-control');
-        myModule.setAttr('#incorrectDateInp', "class", "d-none");
-    });
-    myModule.querySelect('#camera').addEventListener('click', function () {
-        myModule.setAttr('#date', 'class', 'form-control');
-        myModule.setAttr('#incorrectDateInp', "class", "d-none");
-    });*/
-
-
-/* if (!v)
-     return false;*/
-
-/*        if (dateInp === '')
-             error('Input is required here', '#incorrectDateInp', '#date', 'form-control is-invalid', v);
-        if (mission === "Choose a mission")
-            error('Input is required here', '#incorrectMissionInp', '#mission', 'form-select is-invalid');
-        if (cam === "Choose a camera")
-             error('Input is required here\n', '#incorrectCamInp', '#camera', 'form-select is-invalid');
-
-        if (!validDate(dateInp))
-            error('Please enter a valid format of date\n', "#incorrectDateInp", '#date', 'form-control is-invalid');
-        if (!isExistDate(dateInp))
-             error("This date does not exist", "#incorrectDateInp", '#date', 'form-control is-invalid');
-
-
-        let landingDate, maxDate, maxSol;
-
-
-
-
-        return validMissionCamDate(landingDate, maxDate, maxSol, dateInp);*/
-//return  v;
-
-// return error(`The mission you've selected required a date after ${v.landingDate}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
-//else if (validationModule.isEarthDate(dateInp) && (dateInp > v.maxDate))
-//      return error(`The mission you've selected required a date before max date: ${v.maxDate}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
-//  else if (validationModule.isSolDate(dateInp) && dateInp > v.maxSol)
-//     return error(`The mission you've selected required a date before max sol: ${v.maxSol}`, '#incorrectDateInp', '#date', 'form-control is-invalid');
-
-
-//------------------------------------------------
-/*    const clear = function (container) {
-        myModule.querySelect(container).value = '';
-    }*/
-//------------------------------
-/*  const clearForm = function () {
-      // clear but not reset toe form
-      clear('#incorrectDateInp');
-      clear('#incorrectMissionInp');
-      clear('#incorrectCamInp');
-      resetInputs();
-      resetErrors()
-  }*/
-/*    //------------------------------------
-    const resetInputs = function () {
-        myModule.setAttr('#date', 'class', 'form-control');
-        myModule.setAttr('#mission', 'class', 'form-select');
-        myModule.setAttr('#camera', 'class', 'form-select');
-    }*/
-
-//--------------------------------------
-/*    const error = function (str, incorrectInp, formInp, what, v) {
-        myModule.querySelect(incorrectInp).innerHTML += str;
-        myModule.setAttr(incorrectInp, "class", "alert alert-danger");
-        myModule.setAttr(formInp, 'class', what);
-        myModule.querySelect(formInp).value = '';
-        v = false
-        // return false;
-    }
-    //----------------------
-    const errorCamera = function (mission, cam) {
-        myModule.setAttr('#camera', 'class', 'form-select is-invalid');
-        myModule.querySelect("#camera").selectedIndex = 0;
-        error(`${mission} has no ${cam} camera`, '#incorrectCamInp');
-    }*/
+// bs[bs.length - 1].addEventListener('click', saveImageToList);
