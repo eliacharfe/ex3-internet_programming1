@@ -20,11 +20,12 @@ The submission is a WebStorm project that can be run directly from the IDE. <br>
  form, do validation and inform the user what is wrong under the particular input field. <br>
  If all the inputs are correct then executes another fetch with the data to get the mars <br>
  photos and show them in 3 columns with details about each photo and with 2 buttons, 1 button<br>
- save the image in a list of saved imges (with it details), and 1 button that shows the <br>
+ save the image in a list of saved imges (with it details and an opthion to full screen <br>
+ mode of the image in a new tab), and 1 button that shows the <br>
  photo at full screen mode (in another tab). An image can be saved only once, if the user<br>
  tries to save an image that is already saved will get a message throught a pop up modal<br>
  that appears on the screen whithout the need of scrolling up or down. <br>
- Ther is a button that shows a display bootstrap carousel of the current photos that <br>
+ There is a button that shows a display bootstrap carousel of the current photos that <br>
  dispalays at the DOM.<br>
  There is a button that open a modal with my personal datails.
 </p>
