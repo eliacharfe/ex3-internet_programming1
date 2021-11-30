@@ -7,7 +7,7 @@ var LANDING_DATE_CURIOSITY, MAX_DATE_CURIOSITY, MAX_SOL_CURIOSITY,
     LANDING_DATE_SPIRIT, MAX_DATE_SPIRIT, MAX_SOL_SPIRIT;
 
 document.addEventListener('DOMContentLoaded', function () {
-    myModule.querySelect("#searchBtn").addEventListener("click", myModule.getData);
+    myModule.querySelect("#searchBtn").addEventListener("click", myModule.searchMarsPhotos);
     myModule.querySelect('#clearBtn').addEventListener('click', function () {
         myModule.querySelect("#myForm").reset();
         myModule.resetErrors();
@@ -28,12 +28,10 @@ function status(response) {
         return Promise.reject(new Error(response.statusText))
     }
 }
-
 //-------------------------------------------
 function json(response) {
     return response.json()
 }
-
 //---------------------------------
 (function () {
     fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${APIKEY}`)
@@ -85,6 +83,8 @@ const validationModule = (() => {
     //--------------------------------------------------------
     const validForm = function (dateInp, mission, cam) {
         dateInp.value = dateInp.value.trim();
+        mission.value = mission.value.trim();
+        cam.value = cam.value.trim();
 
         let v1 = validateInput(dateInp, isNotEmpty);
         let v2 = validateInput(mission, isNotNullInput);
@@ -336,7 +336,7 @@ const myModule = (() => {
         }
     }
     //---------------------------------
-    const getData = async function () {
+    const searchMarsPhotos = async function () {
         let dateInp = myModule.querySelect("#date");
         let mission = myModule.querySelect('#mission');
         let cam = myModule.querySelect('#camera');
@@ -349,8 +349,8 @@ const myModule = (() => {
         loadingImg.innerHTML = LOAD_IMG_SRC;
 
         dateInp = dateInp.value.trim();
-        mission = mission.value;
-        cam = cam.value;
+        mission = mission.value.trim();
+        cam = cam.value.trim();
 
         fetch(getURL(dateInp, mission, cam))
             .then(status).then(json).then(function (res) {
@@ -380,9 +380,9 @@ const myModule = (() => {
     }
     //--------------------------------------
     const addListeners = function () {
-        let bs = document.getElementsByClassName("btn btn-info ml-2 mr-2");
-        for (let b of bs)
-            b.addEventListener('click', saveImageToList);
+        let buttons = document.getElementsByClassName("btn btn-info ml-2 mr-2");
+        for (let btn of buttons)
+            btn.addEventListener('click', saveImageToList);
     }
     //--------------------------------
     const createNode = function (node) {// generic func
@@ -419,7 +419,7 @@ const myModule = (() => {
             btn.target.click();
             return;
         }
-
+        // if the image is not saved yet
         imgList.foreach(img => {
             if (id === img.id.toString())
                 createLi(img, id); // create next li with the image details and a link to full screen image mode
@@ -505,7 +505,7 @@ const myModule = (() => {
     }
 
     return {
-        getData: getData,
+        searchMarsPhotos: searchMarsPhotos,
         querySelect: querySelect,
         setAttr: setAttr,
         slideShow: slideShow,
