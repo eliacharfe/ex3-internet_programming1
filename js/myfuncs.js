@@ -70,7 +70,7 @@ function json(response) {
         MAX_SOL_SPIRIT = 2208;
     });
 })();
-
+//---------------------------------------
 // Validation Modul /////////////////////
 const validationModule = (() => {
     const validateInput = (inputElement, validateFunc) => {
@@ -103,8 +103,6 @@ const validationModule = (() => {
             }
         }
         if (v2 && !validateInput(mission, validMissionDate))
-            v = false;
-        if (v3 && !validateInput(cam, isCameraExistToMission))
             v = false;
 
         return v;
@@ -154,18 +152,6 @@ const validationModule = (() => {
                 maxSol: MAX_SOL_SPIRIT,
             }
         }
-    }
-    //---------------------------
-    const isCameraExistToMission = function (cam) {
-        let mission = myModule.querySelect('#mission').value;
-
-        if ((isCuriosity(mission) && (cam === "PANCAM" || cam === "MINITES"))
-            || ((isOpportunity(mission) || isSpirit(mission)) && (cam === "MAST" || cam === "CHEMCAM" || cam === "MAHLI" || cam === "MARDI")))
-            return {
-                isValid: false,
-                message: `${mission} has no ${cam} camera`
-            }
-        return {isValid: true, message: ''}
     }
     //----------------------------------
     const isEarthDate = (date) => {
@@ -298,6 +284,7 @@ const classesModule = (() => {
             let col1 = myModule.querySelect("#imagesOutput1");
             let col2 = myModule.querySelect("#imagesOutput2");
             let col3 = myModule.querySelect("#imagesOutput3");
+            let noImages =  myModule.querySelect('#warning');
             myModule.clearOutput();// clear output divs
 
             this.list.forEach(img => {
@@ -308,6 +295,7 @@ const classesModule = (() => {
                 else if (this.list.indexOf(img) % 3 === 2)
                     img.appendCardToHtml(col3, img);
             });
+            this.list.length === 0 ? noImages.className = "row-fluid d-block" : noImages.className = "row-fluid d-none";
         }
     }
     return {
@@ -337,10 +325,11 @@ const myModule = (() => {
     }
     //---------------------------------
     const searchMarsPhotos = async function () {
-        let dateInp = myModule.querySelect("#date");
-        let mission = myModule.querySelect('#mission');
-        let cam = myModule.querySelect('#camera');
-        let loadingImg = myModule.querySelect('#loading');
+        let dateInp = querySelect("#date");
+        let mission = querySelect('#mission');
+        let cam = querySelect('#camera');
+        let loadingImg = querySelect('#loading');
+       // let noImages =  querySelect('#warning');
 
         if (!validationModule.validForm(dateInp, mission, cam))
             return;
@@ -359,7 +348,7 @@ const myModule = (() => {
             res.photos.forEach(p => {
                 imgList.add(new classesModule.Image(p.img_src, dateInp, p.id, mission, cam, p.earth_date, p.sol));
             });
-            imgList.generateHTML()
+            imgList.generateHTML();
             addListeners();
         })
             .catch(function (err) {
@@ -368,7 +357,6 @@ const myModule = (() => {
             });
 
         imgList.empty();
-        myModule.querySelect("#myForm").reset(); // reset the form
     }
 //----------------------------
     const querySelect = function (container) {// generic func
@@ -518,3 +506,19 @@ const myModule = (() => {
 // bs[bs.length - 1].addEventListener('click', saveImageToList);
 
 // return `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?earth_date=${dateInp}&camera=${cam}&api_key=${APIKEY}`
+
+//---------------------------
+/*    const isCameraExistToMission = function (cam) {
+        let mission = myModule.querySelect('#mission').value;
+
+        if ((isCuriosity(mission) && (cam === "PANCAM" || cam === "MINITES"))
+            || ((isOpportunity(mission) || isSpirit(mission)) && (cam === "MAST" || cam === "CHEMCAM" || cam === "MAHLI" || cam === "MARDI")))
+            return {
+                isValid: false,
+                message: `${mission} has no ${cam} camera`
+            }
+        return {isValid: true, message: ''}
+    }*/
+
+/*if (v3 && !validateInput(cam, isCameraExistToMission))
+    v = false;*/
