@@ -295,7 +295,7 @@ const classesModule = (() => {
                 else if (this.list.indexOf(img) % 3 === 2)
                     img.appendCardToHtml(col3, img);
             });
-            this.list.length === 0 ? noImages.className = "row-fluid d-block" : noImages.className = "row-fluid d-none";
+            !this.list.length ? noImages.className = "row-fluid d-block" : noImages.className = "row-fluid d-none";
         }
     }
     return {
@@ -329,7 +329,6 @@ const myModule = (() => {
         let mission = querySelect('#mission');
         let cam = querySelect('#camera');
         let loadingImg = querySelect('#loading');
-       // let noImages =  querySelect('#warning');
 
         if (!validationModule.validForm(dateInp, mission, cam))
             return;
@@ -353,7 +352,7 @@ const myModule = (() => {
         })
             .catch(function (err) {
                 console.log("catch: " + err);
-                myModule.querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
+                querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
             });
 
         imgList.empty();
@@ -364,7 +363,7 @@ const myModule = (() => {
     }
 //------------------------------------
     const setAttr = function (container, qualName, val) {// generic func
-        myModule.querySelect(container).setAttribute(qualName, val);
+        querySelect(container).setAttribute(qualName, val);
     }
     //--------------------------------------
     const addListeners = function () {
@@ -389,15 +388,15 @@ const myModule = (() => {
     }
     //-----------------------------
     const clearOutput = function () {
-        myModule.querySelect('#imagesOutput1').innerHTML = '';
-        myModule.querySelect('#imagesOutput2').innerHTML = '';
-        myModule.querySelect('#imagesOutput3').innerHTML = '';
+        querySelect('#imagesOutput1').innerHTML = '';
+        querySelect('#imagesOutput2').innerHTML = '';
+        querySelect('#imagesOutput3').innerHTML = '';
     }
     //---------------------------------------
     const saveImageToList = function (btn) {
         const id = btn.target.parentElement.getElementsByTagName('p')[0].innerHTML;
         let exist = false;
-        const savedListImg = myModule.querySelect('#infos').querySelectorAll('li');
+        const savedListImg = querySelect('#infos').querySelectorAll('li');
         savedListImg.forEach(li => { // check if the image user want to save is already exist
             if (li.id === id) exist = true;
         });
@@ -419,7 +418,7 @@ const myModule = (() => {
         li.id = id;
         li.appendChild(createLink(img, id));
         li.innerHTML += "Earth date: " + img.earth_date + ', Sol: ' + img.sol + ', Camera: ' + img.camera;
-        myModule.querySelect('#infos').appendChild(li);
+        querySelect('#infos').appendChild(li);
     }
     //---------------------------
     const createLink = function (img, id) {
@@ -433,8 +432,8 @@ const myModule = (() => {
     //-------------------------------------
     //-------------------------------------
     const slideShow = function () {
-        let carousel = myModule.querySelect('#innerCarousel');
-        let indicator = myModule.querySelect('#indicator');
+        let carousel = querySelect('#innerCarousel');
+        let indicator = querySelect('#indicator');
         carousel.innerHTML = indicator.innerHTML = '';
 
         imgList.foreach(img => {
