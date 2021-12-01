@@ -34,6 +34,7 @@ function json(response) {
 }
 //---------------------------------
 (function () {
+    /** executing 3 fetches to get the dates of every rover (landing date, max earth date, max sol day) */
     fetch(`https://api.nasa.gov/mars-photos/api/v1/manifests/Curiosity?api_key=${APIKEY}`)
         .then(status).then(json).then(function (res) {
         console.log(res);
@@ -70,8 +71,11 @@ function json(response) {
         MAX_SOL_SPIRIT = 2208;
     });
 })();
-//---------------------------------------
-// Validation Modul /////////////////////
+//---------------------------------------//
+/**
+ * Validation Module
+ * @type {{validForm: (function(*=, *=, *=): *), isSolDate: (function(*): *), isEarthDate: (function(*): *)}}
+ */
 const validationModule = (() => {
     /** a function that get an input element and a validation function and if the func return false ==> show message
      * @param inputElement - the input element from the form
@@ -89,7 +93,7 @@ const validationModule = (() => {
      * @param dateInp - get the input that includes the date
      * @param mission - get the input that includes the rover
      * @param cam - get the input that includes the camera
-     * @returns {boolean*} - return true or false */
+     * @returns {boolean/*} - return true or false */
     const validForm = function (dateInp, mission, cam) {
         dateInp.value = dateInp.value.trim();
         mission.value = mission.value.trim();
@@ -243,7 +247,10 @@ const validationModule = (() => {
     }
 })();
 //----------------------------//////////////////////////
-//  Classes Modul
+/**
+ * Classes Module
+ * @type {{Image: Image, ImagesList: ImagesList}}
+ */
 const classesModule = (() => {
     const Image = class Image { // single image class
         /** create new object according to mars photo got at the fetch
@@ -284,7 +291,6 @@ const classesModule = (() => {
                 </div>
             </div>`;
         }
-
         //----------------------------------
         /** append a card to the dom
          * @param where - which div output to append the card
@@ -351,6 +357,10 @@ const classesModule = (() => {
     }
 })();
 //--------------------------------------------------
+/**
+ * main Module
+ * @type {{searchMarsPhotos: ((function(): Promise<void>)|*), clearOutput: clearOutput, slideShow: slideShow, resetErrors: resetErrors, querySelect: (function(*=): *), setAttr: setAttr}}
+ */
 const myModule = (() => {
     let imgList = new classesModule.ImagesList();
 
@@ -420,7 +430,7 @@ const myModule = (() => {
     const querySelect = function (container) {
         return document.querySelector(container);
     }
-//
+     //---------------------
     /** set attribute to a DOM object
      * @param container - get an #id
      * @param qualName - get a qualified name (class, href, etc)
