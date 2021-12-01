@@ -73,6 +73,10 @@ function json(response) {
 //---------------------------------------
 // Validation Modul /////////////////////
 const validationModule = (() => {
+    /** a function that get an input element and a validation function and if the func return false ==> show message
+     * @param inputElement - the input element from the form
+     * @param validateFunc - a function that validate a specific validation according to the input element sent
+     * @returns {boolean|*} - return true if validation is OK (with the particular function and the input sent), else false */
     const validateInput = (inputElement, validateFunc) => {
         let errorElement = inputElement.nextElementSibling; // the error message div
         let v = validateFunc(inputElement.value); // call the validation function
@@ -81,6 +85,11 @@ const validationModule = (() => {
         return v.isValid;
     }
     //--------------------------------------------------------
+    /** a function that validate the input elements - if all validation are correct ==> return true, else false
+     * @param dateInp - get the input that includes the date
+     * @param mission - get the input that includes the rover
+     * @param cam - get the input that includes the camera
+     * @returns {boolean*} - return true or false */
     const validForm = function (dateInp, mission, cam) {
         dateInp.value = dateInp.value.trim();
         mission.value = mission.value.trim();
@@ -108,6 +117,9 @@ const validationModule = (() => {
         return v;
     }
 //---------------------------------
+    /** a validation function that get the rover and validate its date (according to the date input)
+     * @param mission - the input element that includes the rover
+     * @returns {{isValid: boolean, message: string}} - return a boolean and a message in case validation failed */
     const validMissionDate = function (mission) {
         let dateInp = myModule.querySelect('#date').value;
         let v = setDateMissionCam(mission);
@@ -132,6 +144,9 @@ const validationModule = (() => {
         return { isValid: true, message: ''}
     }
     //-------------------------------
+    /** returns accurate data dates of the mission selected (according to the 3 start fetches)
+     * @param mission - the input element that includes the rover
+     * @returns {{maxSol, maxDate, landingDate}} - return data dates of the specific rover input */
     const setDateMissionCam = function (mission) {
         if (isCuriosity(mission)) {
             return {
@@ -154,14 +169,23 @@ const validationModule = (() => {
         }
     }
     //----------------------------------
+    /** check if the date input has the format yyyy-mm-dd
+     * @param date - the input element that includes the date
+     * @returns {*} - return true or false */
     const isEarthDate = (date) => {
         return date.match(/^\d{4}-\d{1,2}-\d{1,2}$/);
     }
     //--------------------------------
+    /** check if the date input has the format of a Sol mars day
+     * @param date - the input element that includes the date
+     * @returns {*} - return true or false */
     const isSolDate = (date) => {
         return date.match(/^\d{1,4}$/);
     }
     //---------------------------------
+    /** check if the date is a valid format date
+     * @param date  - the input element that includes the date
+     * @returns {{isValid: *, message: string}} - return a boolean and a message in case validation failed */
     const validDate = function (date) {
         return {
             isValid: (validationModule.isEarthDate(date) || validationModule.isSolDate(date)),
@@ -169,6 +193,10 @@ const validationModule = (() => {
         };
     }
     //---------------------------------
+    /** check if the date exist at all (for example 2015-13-22 is not a valid date because there is no 13th month)
+     * assuming it has already the correct format
+     * @param date - the input element that includes the date
+     * @returns {{isValid: boolean, message: string}} - return a boolean and a message in case validation failed */
     const isExistDate = function (date) {
         let d = new Date(date);
         return {
@@ -177,6 +205,9 @@ const validationModule = (() => {
         }
     }
     //-------------------------------------
+    /** check if the input is not empty
+     * @param str - the string to validate
+     * @returns {{isValid: boolean, message: string}} - return a boolean and a message in case validation failed */
     const isNotEmpty = function (str) {
         return {
             isValid: (str.length !== 0),
@@ -184,6 +215,9 @@ const validationModule = (() => {
         };
     }
     //----------------------------------------
+    /** check if the user didnt selected from the form selection
+     * @param str - the string to validate
+     * @returns {{isValid: boolean, message: string}} - return a boolean and a message in case validation failed */
     const isNotNullInput = function (str) {
         return {
             isValid: (str !== "Choose a mission" && str !== "Choose a camera"),
@@ -212,6 +246,14 @@ const validationModule = (() => {
 //  Classes Modul
 const classesModule = (() => {
     const Image = class Image { // single image class
+        /** create new object according to mars photo got at the fetch
+         * @param image_src - the image source
+         * @param date - the date of the image
+         * @param id - the image's ID
+         * @param mission - the rover
+         * @param camera - the camera
+         * @param earth_date - the image's earth date
+         * @param sol - the image's sol */
         constructor(image_src, date, id, mission, camera, earth_date, sol) {
             this.image_src = image_src;
             this.date = date;
@@ -222,6 +264,7 @@ const classesModule = (() => {
             this.sol = sol;
         }
 
+        /** @returns {string} - return a div that includes a card with an image and its details */
         createDiv() {
             return `
             <div>
@@ -243,8 +286,11 @@ const classesModule = (() => {
         }
 
         //----------------------------------
+        /** append a card to the dom
+         * @param where - which div output to append the card
+         * @param element - the element at the list */
         appendCardToHtml = (where, element) => {
-            where.insertAdjacentHTML('beforeend', element.createDiv()); // where.appendChild(element.createDiv());
+            where.insertAdjacentHTML('beforeend', element.createDiv());
         }
     }
     //-------------------
@@ -253,18 +299,18 @@ const classesModule = (() => {
         constructor() {
             this.list = [];
         }
-
         //----------
         add(img) {
             this.list.push(img);
         }
-
         //------------
         indexOf(i) {
             return this.list.indexOf(i);
         }
-
         //----------------
+        /** implementation of the known js loop "forEach" (doing that because the data structure is protected
+         * to the "outside world" and generic)
+         * @param callback - return the element of the data structure */
         foreach = function (callback) {
             if (callback && typeof callback === 'function') {
                 for (let i = 0; i < this.list.length; i++) {
@@ -279,6 +325,7 @@ const classesModule = (() => {
         }
 
         //----------------------------------
+        /** displays the photos at the DOM */
         generateHTML() {
             myModule.querySelect('#loading').style.display = "none";
             let col1 = myModule.querySelect("#imagesOutput1");
@@ -307,6 +354,11 @@ const classesModule = (() => {
 const myModule = (() => {
     let imgList = new classesModule.ImagesList();
 
+    /** create a URL to fetch according to the inputs data
+     * @param dateInp  - the input element that includes the date
+     * @param mission  - the input element that includes the rover
+     * @param cam  - the input element that includes the camera
+     * @returns {string} - the correct URL to fetch */
     const getURL = function (dateInp, mission, cam) {
         const roverURL = `https://api.nasa.gov/mars-photos/api/v1/rovers/${mission}/photos?`;
         const params = new URLSearchParams();
@@ -324,6 +376,10 @@ const myModule = (() => {
         }
     }
     //---------------------------------
+    /** This function is the main function that do the fetch to get the mars's photos according to the inputs,
+     * but will not do the fetch before the validation is correct (if validation is not correct then returns
+     * immediately and not executing the fetch).
+     * @returns {Promise<void>} */
     const searchMarsPhotos = async function () {
         let dateInp = querySelect("#date");
         let mission = querySelect('#mission');
@@ -355,38 +411,56 @@ const myModule = (() => {
                 querySelect("#imagesOutput1").innerHTML = "Sorry, cannot connect to NASA server...";
             });
 
-        imgList.empty();
+        imgList.empty(); // will empty the list
     }
 //----------------------------
-    const querySelect = function (container) {// generic func
+    /** for more readable syntax
+     * @param container - get an #id
+     * @returns {*} - returns selector with the particular id sent */
+    const querySelect = function (container) {
         return document.querySelector(container);
     }
-//------------------------------------
-    const setAttr = function (container, qualName, val) {// generic func
+//
+    /** set attribute to a DOM object
+     * @param container - get an #id
+     * @param qualName - get a qualified name (class, href, etc)
+     * @param val - get the value we want to insert */
+    const setAttr = function (container, qualName, val) {
         querySelect(container).setAttribute(qualName, val);
     }
     //--------------------------------------
+    /** add listeners to the save buttons of the DOM inserted photos (every card has a such button) */
     const addListeners = function () {
         let buttons = document.getElementsByClassName("btn btn-info ml-2 mr-2");
         for (let btn of buttons)
             btn.addEventListener('click', saveImageToList);
     }
     //--------------------------------
-    const createNode = function (node) {// generic func
+    /** creates a DOM element
+     * @param node - a tag
+     * @returns {*} - returns a created element with the particular tag sent */
+    const createNode = function (node) {
         return document.createElement(node);
     }
     //-----------------
-    const appendNode = function (parent, child, nameClass, inner) { // generic func
+    /** set the child and append him to the parent sent
+     * @param parent - get the parent node
+     * @param child - get the child node
+     * @param nameClass - the class name we want to insert to the child
+     * @param inner - the innerHTML we want to insert to the child */
+    const appendNode = function (parent, child, nameClass, inner) {
         child.className = nameClass;
         child.innerHTML = inner;
         parent.appendChild(child);
     }
     //---------------------
+    /** reset errors to none errors */
     const resetErrors = function () {
         document.querySelectorAll(".is-invalid").forEach((e) => e.classList.remove("is-invalid"));
         document.querySelectorAll(".errormessage").forEach((e) => e.innerHTML = "");
     }
     //-----------------------------
+    /** clear the outputs of the DOM */
     const clearOutput = function () {
         querySelect('#imagesOutput1').innerHTML = '';
         querySelect('#imagesOutput2').innerHTML = '';
@@ -394,6 +468,8 @@ const myModule = (() => {
         querySelect('#warning').className = "row-fluid d-none";
     }
     //---------------------------------------
+    /** save an image and its details at the list of saved images (only if that image is not saved yet)
+     * @param btn - the button pressed (a Save button of a card element at the DOM) */
     const saveImageToList = function (btn) {
         const id = btn.target.parentElement.getElementsByTagName('p')[0].innerHTML;
         let exist = false;
@@ -414,6 +490,9 @@ const myModule = (() => {
         })
     }
     //-----------------------------------
+    /**create a new "li" with the image's detail
+     * @param img - an element that includes details of an image
+     * @param id - the "button id" (note that the button id is the same of the image id because we take the first child of the card that includes the photo id) */
     const createLi = function (img, id) {
         let li = document.createElement('li');
         li.id = id;
@@ -422,6 +501,7 @@ const myModule = (() => {
         querySelect('#infos').appendChild(li);
     }
     //---------------------------
+    /** creates a link to a full screen mode image in a new tab at the browser */
     const createLink = function (img, id) {
         let a = document.createElement('a');
         a.setAttribute('id', id);
@@ -432,6 +512,7 @@ const myModule = (() => {
     }
     //-------------------------------------
     //-------------------------------------
+    /** implementing the carousel of the photos */
     const slideShow = function () {
         let carousel = querySelect('#innerCarousel');
         let indicator = querySelect('#indicator');
@@ -444,6 +525,9 @@ const myModule = (() => {
         });
     }
     //------------------------------------
+    /** creates a button to the carousel
+     * @param img - the image element
+     * @returns {*} - return the button to insert to the indicator DOM element */
     function createBtn(img) {
         let btn = createNode('button');
         btn.setAttribute('data-bs-target', '#carousel');
@@ -457,7 +541,13 @@ const myModule = (() => {
         return btn;
     }
     //---------------------------------------
-    const createImageCarousel = function (img_src, cameraName, dateMission, index) {
+    /** creates the image for append in the carousel
+     * @param img_src - the image's source
+     * @param cameraName - the camera name
+     * @param date - the date
+     * @param index - the index of the element
+     * @returns {*} - return the div to append to the DOM */
+    const createImageCarousel = function (img_src, cameraName, date, index) {
         let nameClass;
         (index === 0) ? nameClass = "carousel-item active" : nameClass = "carousel-item";
 
@@ -477,9 +567,9 @@ const myModule = (() => {
         camName.innerHTML = cameraName;
         divCap.appendChild(camName);
 
-        let date = createNode('p');
-        date.innerHTML = dateMission;
-        divCap.appendChild(date);
+        let d = createNode('p');
+        d.innerHTML = date;
+        divCap.appendChild(d);
 
         let a = createNode('a');
         a.setAttribute('href', img_src);
@@ -501,6 +591,17 @@ const myModule = (() => {
         clearOutput: clearOutput
     }
 })();
+
+
+
+
+
+
+
+
+
+
+
 
 
 // bs[bs.length - 1].addEventListener('click', saveImageToList);
