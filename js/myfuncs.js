@@ -284,7 +284,6 @@ const classesModule = (() => {
             let col1 = myModule.querySelect("#imagesOutput1");
             let col2 = myModule.querySelect("#imagesOutput2");
             let col3 = myModule.querySelect("#imagesOutput3");
-            let noImages =  myModule.querySelect('#warning');
             myModule.clearOutput();// clear output divs
 
             this.list.forEach(img => {
@@ -295,7 +294,8 @@ const classesModule = (() => {
                 else if (this.list.indexOf(img) % 3 === 2)
                     img.appendCardToHtml(col3, img);
             });
-            !this.list.length ? noImages.className = "row-fluid d-block" : noImages.className = "row-fluid d-none";
+            if (!this.list.length) // if there are no images ==> notify the user
+                myModule.querySelect('#warning').className = "row-fluid d-block";
         }
     }
     return {
@@ -391,6 +391,7 @@ const myModule = (() => {
         querySelect('#imagesOutput1').innerHTML = '';
         querySelect('#imagesOutput2').innerHTML = '';
         querySelect('#imagesOutput3').innerHTML = '';
+        querySelect('#warning').className = "row-fluid d-none";
     }
     //---------------------------------------
     const saveImageToList = function (btn) {
