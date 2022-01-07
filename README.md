@@ -4,7 +4,7 @@
 A started template for JS project
 
 <h1>Eliachar Feig</h1>
-<p>Email: eliacharfet@edu.hac.ac.il<br>
+<p>Email: eliacharfe@edu.hac.ac.il<br>
  ID: 302278338</p>
 
 <h1>Execution</h1>
